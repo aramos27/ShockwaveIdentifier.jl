@@ -4,7 +4,7 @@
 
 ## About
 
-**ShockwaveIdentifier** is a Julia module designed for detecting and analyzing shockwaves in computational fluid dynamics simulations by Euler equations. This module expands the [Euler2D] (https://github.com/STCE-at-RWTH/Euler2D.jl) solver of Alexander Fleming developed at the STCE group of RWTH Aachen University.
+**ShockwaveIdentifier** is a Julia module designed for detecting and analyzing shockwaves in computational fluid dynamics simulations by Euler equations. This module expands the [Euler2D](https://github.com/STCE-at-RWTH/Euler2D.jl) solver of Alexander Fleming developed at the [STCE group](stce.rwth-aachen.de) of RWTH Aachen University.
 
 This project is developed as part of the Computational Engineering Science study at RWTH Aachen in 2024.
 
