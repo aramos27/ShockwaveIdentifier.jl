@@ -1,5 +1,7 @@
 module ShockwaveIdentifier
 
-# Write your package code here.
+include("shock1D.jl")
+include("shock2D.jl")
+
 
 end
