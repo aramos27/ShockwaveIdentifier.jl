@@ -3,6 +3,10 @@ uuid = "94dcc3ce-2298-43b8-8061-dc5dbd7190fe"
 authors = ["Andres Ramos", "Dino Liwen Cheng", "Mido, Ido", "Jonas Weschollek"]
 version = "1.0.0-DEV"
 
+[deps]
+Euler2D = "c24a2923-03cb-4692-957a-ccd31f2ad327"
+ShockwaveProperties = "77d2bf28-a3e9-4b9c-9fcf-b85f74cc8a50"
+
 [compat]
 julia = "1.6.7"
 
