@@ -12,6 +12,8 @@ using Dates
 
 include("shock1D.jl")
 include("shock2D.jl")
+include("plotting.jl")
+include("data_utils.jl")
 
 
 
