@@ -169,3 +169,45 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}) where {T}
     #debug display(combined_plot)
     savefig(combined_plot, "plot_frame2d.png")
 end
+
+#Plots heatmap of d1p 
+function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+    datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
+    d1p = delta_1p(frame, data)
+    #Plotting
+    delta_1rho_plot = heatmap(
+        d1p, 
+        title="δ_1ρ step $frame", 
+        xlabel="X-axis", 
+        ylabel="Y-axis", 
+        color=:viridis,
+        aspect_ratio=1,  # Ensures the heatmap is square
+        #size= (5000,5000)
+        )
+    plot(delta_1rho_plot)
+    filename = joinpath(save_dir, "delta_1p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
+    savefig(delta_1rho_plot, filename)
+
+
+end
+
+#Plots heatmap of d2p 
+function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+    d2p = delta_2p(frame, data)
+    datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
+    #Plotting
+    delta_2rho_plot = heatmap(
+        d2p, 
+        title="δ_2ρ step $frame", 
+        xlabel="X-axis", 
+        ylabel="Y-axis", 
+        color=:viridis,
+        aspect_ratio=1,  # Ensures the heatmap is square
+        #size= (5000,5000)
+        )
+        
+    plot(delta_2rho_plot)
+    filename = joinpath(save_dir, "delta_2p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
+    savefig(delta_2rho_plot, filename)
+
+end
