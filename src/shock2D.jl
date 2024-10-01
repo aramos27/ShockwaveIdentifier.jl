@@ -82,6 +82,7 @@ function delta_1p(frame, data::EulerSim{2,4,T}) where {T}
 
     # Convert each Tuple to an SVector
     sdRho = map(x -> SVector{2}(x...), dRho_normalized)
+    #sdRho = dRho_normalized
     sdRho = ustrip.(sdRho)
     
     
@@ -93,12 +94,10 @@ function delta_1p(frame, data::EulerSim{2,4,T}) where {T}
     return d1p
 end
 
-"""Serves the purpose of finding zeros in discretized data such as d1p and d2p through sign changes. 
+#=
+Serves the purpose of finding zeros in discretized data such as d1p and d2p through sign changes. 
     Wherever a sign change occurs, the values are replaced with 0.
-"""
-"""Serves the purpose of finding zeros in discretized data such as d1p and d2p through sign changes. 
-    Wherever a sign change occurs, the values are replaced with 0.
-"""
+=#
 function find_zeros!(discret)
     if ndims(discret) == 1
         
@@ -217,7 +216,6 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = 0.1, eps2::T = 10e-4) w
     #play around with these two parameters. Something is definitely off here.
     #Decreasing eps1 increases the amount of candidates. We set eps1 a bit higher. I am sure there shall be a way to adaptively calculate eps1 to decide what is a significant density gradient.
     #Increasing eps2 increases the amount of candidates, but might lead to the detection of standard propagation waves as shocks.
-
     find_zeros!(d2p)
 
     shock_counter = 0
@@ -226,9 +224,9 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = 0.1, eps2::T = 10e-4) w
     for i in 1:size(d1p, 1)
         for j in 1:size(d1p, 2)
             # If both d1p and d2p are zero, set the corresponding element in the blanked matrix to zero
-            if abs(d1p[i,j]) > eps1
+            if abs(d1p[i,j]) > eps1 #d1p != 0
                 
-                if abs(d2p[i, j]) < eps2
+                if abs(d2p[i, j]) < eps2 #d2p == 0
                     blanked[i, j] = 1
                     
                     shock_counter += 1
@@ -246,4 +244,23 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = 0.1, eps2::T = 10e-4) w
     return blanked
 end
 
-#function findShock2D(frame, data::EulerSim{2,4,T})
+#Finds all possible shockpoints and returns a list of their coordinates. 
+function findShock2D(frame, data::EulerSim{2,4,T}) where {T}
+    d1p = delta_1p(frame, data);
+    d2p = delta_2p(frame, data, d1p);
+    blanked = blank(d1p, d2p, 0.15, 10e-5);
+
+    blanked_bool = falses(size(blanked))
+    blanked_bool .= blanked .> 0 
+
+    shocklist = []
+    for i in 1:size(blanked_bool, 1)
+        for j in 1:size(blanked_bool, 2)
+            if blanked_bool[i, j] == true
+                push!(shocklist, (i, j))
+            end
+        end
+    end
+    return shocklist
+end 
+
