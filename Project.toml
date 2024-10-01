@@ -6,11 +6,13 @@ version = "1.0.0-DEV"
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Euler2D = "c24a2923-03cb-4692-957a-ccd31f2ad327"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ShockwaveProperties = "77d2bf28-a3e9-4b9c-9fcf-b85f74cc8a50"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 

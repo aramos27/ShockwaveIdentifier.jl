@@ -9,12 +9,20 @@ using ShockwaveProperties
 using Tullio
 using Unitful
 using Dates
+using Images
+
+using StaticArrays
 
 include("shock1D.jl")
 include("shock2D.jl")
+
 include("plotting.jl")
 include("data_utils.jl")
 
+export load_sim_data
+
+export findShock1D
+export findShock2D
 
 
 end
