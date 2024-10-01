@@ -58,7 +58,7 @@ function normalized_velocity(frame, data::EulerSim{2, 4, T}) where {T}
 end
 
 #Given a matrix A with elements of type [x,y] and a matrix B of type float, it returns A/B
-function divide_matrices(matrix1, matrix2)
+function divide_matrices_1(matrix1, matrix2)
  
     if size(matrix1) != size(matrix2)
         throw(ArgumentError("Matrices must have the same dimensions"))
@@ -79,7 +79,39 @@ function divide_matrices(matrix1, matrix2)
             y2 = y1 / Float64(q2)
 
             # Store the result as a tuple in the new matrix
-            result[i, j] = (x2, y2)
+            result[i, j] = SVector{x2, y2}()
+        end
+    end
+
+    return result
+end
+
+function divide_matrices(matrix1, matrix2)
+    if size(matrix1) != size(matrix2)
+        throw(ArgumentError("Matrices must have the same dimensions"))
+    end
+
+    # Create a new matrix with the same dimensions and type
+    result = similar(matrix1, eltype(matrix1))
+
+    # Iterate through the matrices and perform the division
+    for i in 1:size(matrix1, 1)
+        for j in 1:size(matrix1, 2)
+            # Extract the SVector and the corresponding element from the second matrix
+            (x1, y1) = matrix1[i, j]
+            q2 = matrix2[i, j]
+
+            # Check for division by zero if necessary (depending on your application)
+            if q2 == 0
+                throw(DomainError("Division by zero at position ($i, $j)"))
+            end
+
+            # Normalize the SVector by dividing its components by the quantity
+            x2 = x1 / Float64(q2)  # Convert Unitful quantity to Float64
+            y2 = y1 / Float64(q2)
+
+            # Store the result as an SVector in the new matrix
+            result[i, j] = SVector(x2, y2)
         end
     end
 
