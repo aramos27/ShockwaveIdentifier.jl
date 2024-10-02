@@ -137,37 +137,38 @@ function plot_1d_heatmap(magnitude, filename::String)
     savefig(heatmap_plot, filename)
 end
 
-#Plots pressure and velocity for 2d grid
-function plotframe2D(frame, data::EulerSim{2, 4, T}) where {T}
+#Plots wanted quantity for 2d grid
+function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
+    plot_data = compute_data_function(frame, data)
 
-    # Compute velocity magnitudes
-    velocity_data_magnitude = map(eachslice(u_data; dims=(2,3))) do u
-        c = ConservedProps(u[1:end])
-        velocity_in_ms = velocity(c, DRY_AIR)
-        velocity_x = uconvert(u"m/s", velocity_in_ms[1])
-        velocity_y = uconvert(u"m/s", velocity_in_ms[2])
-        return sqrt(velocity_x^2 + velocity_y^2)  # Combine x and y components into a magnitude
+    # Determine the header based on the data's units
+    header = ""
+    # Use eltype to check if the elements are Unitful.Quantity
+    if eltype(plot_data) <: Unitful.Quantity
+        unit_type = unit(plot_data[1,1])
+
+        # Match against known units for pressure, velocity, or density
+        if unit_type == u"Pa"  # Pressure (Pascals)
+            header = "Pressure (Pa)"
+        elseif unit_type == u"m/s"  # Velocity (meters per second)
+            header = "Velocity (m/s)"
+        elseif unit_type == u"kg/m^3"  # Density (kilograms per cubic meter)
+            header = "Density (kg/m³)"
+        else
+            header = "Unknown Data"
+        end
+    else
+        header = "Unknown Data"
     end
 
-    # Compute pressure data
-    pressure_data = map(eachslice(u_data; dims=(2,3))) do u
-        c = ConservedProps(u[1:end])
-        gas_in_pa = pressure(c, DRY_AIR)
-        return uconvert(u"Pa", gas_in_pa)
-    end
-
-    # Plotting
-    pressure_plot = heatmap(xs, ys, pressure_data, aspect_ratio=:equal, title="Pressure (Pa)", color=:viridis)
-    velocity_plot = heatmap(xs, ys, velocity_data_magnitude, aspect_ratio=:equal, title="Velocity Magnitude (m/s)", color=:plasma)
-
-    # Combine plots into a layout
-    combined_plot = plot(pressure_plot, velocity_plot, layout = (1, 2))
+    #Plotting
+    heatmap_plot = heatmap(xs, ys, plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    final_plot_layout = plot(heatmap_plot)
 
     # Display and save the plot
-    #debug display(combined_plot)
-    savefig(combined_plot, "plot_frame2d.png")
+    savefig(final_plot_layout, "plot_frame2d.png")
 end
 
 #Plots heatmap of d1p 
@@ -210,4 +211,50 @@ function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where 
     filename = joinpath(save_dir, "delta_2p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
     savefig(delta_2rho_plot, filename)
 
+end
+
+function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm , vectors = false) where {T}
+    (t, u_data) = nth_step(data, frame)
+    xs, ys = cell_centers(data)
+    shock_points = shockwave_algorithm(frame, data)
+    plot_data = compute_data_function(frame, data)
+
+    # Determine the header based on the data's units
+    header = ""
+    # Use eltype to check if the elements are Unitful.Quantity
+    if eltype(plot_data) <: Unitful.Quantity
+        unit_type = unit(plot_data[1,1])
+
+        # Match against known units for pressure, velocity, or density
+        if unit_type == u"Pa"  # Pressure (Pascals)
+            header = "Pressure (Pa)"
+        elseif unit_type == u"m/s"  # Velocity (meters per second)
+            header = "Velocity (m/s)"
+        elseif unit_type == u"kg/m^3"  # Density (kilograms per cubic meter)
+            header = "Density (kg/m³)"
+        else
+            header = "Unknown Data"
+        end
+    else
+        header = "Unknown Data"
+    end
+
+    # Plotting heatmaps
+    #Plotting
+    heatmap_plot = heatmap(xs, ys, plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    
+
+    # Extract shock point coordinates
+    shock_xs = [xs[i] for (i, j) in shock_points]
+    shock_ys = [ys[j] for (i, j) in shock_points]
+
+    # Overlay shock points on both plots
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=2, marker=:cross)
+
+    if vectors
+        print("Vectors")
+    end
+    final_plot_layout = plot(heatmap_plot)
+    savefig(final_plot_layout, "plot_frame2d_shock.png")
+    savefig(final_plot_layout, "plot_frame2d_shock_zoomable.html")
 end

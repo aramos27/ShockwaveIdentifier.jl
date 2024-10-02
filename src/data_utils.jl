@@ -57,6 +57,19 @@ function normalized_velocity(frame, data::EulerSim{2, 4, T}) where {T}
     return velocity_xy
 end
 
+function compute_velocity_magnitude_data(frame, data::EulerSim{2,4,T}) where {T}
+    (t, u_data) = nth_step(data, frame)
+    velocity_data_magnitude = map(eachslice(u_data; dims=(2,3))) do u
+        c = ConservedProps(u[1:end])
+        velocity_in_ms = velocity(c, DRY_AIR)
+        velocity_x = uconvert(u"m/s", velocity_in_ms[1])
+        velocity_y = uconvert(u"m/s", velocity_in_ms[2])
+        return sqrt(velocity_x^2 + velocity_y^2)
+    end
+    return velocity_data_magnitude
+end
+
+
 #Given a matrix A with elements of type [x,y] and a matrix B of type float, it returns A/B
 function divide_matrices_1(matrix1, matrix2)
  

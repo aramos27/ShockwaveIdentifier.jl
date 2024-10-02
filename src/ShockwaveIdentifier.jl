@@ -25,5 +25,8 @@ export findShock1D
 export findShock2D
 export normalVectors
 
+export plotframe1D
+export plotframe2D
+
 
 end
