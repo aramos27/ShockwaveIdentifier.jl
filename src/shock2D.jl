@@ -264,3 +264,10 @@ function findShock2D(frame, data::EulerSim{2,4,T}) where {T}
     return shocklist
 end 
 
+function normalVectors(frame, data::EulerSim{2,4,T}, shocklist) where {T}
+    p = compute_pressure_data(frame,data)
+    dp = gradient_2d(frame,data,compute_pressure_data)
+    shock_dir = [normalize(dp[i,j]) for (i,j) in shocklist]
+    
+    return shock_dir
+end 
