@@ -23,6 +23,7 @@ export load_sim_data
 
 export findShock1D
 export findShock2D
+export normalVectors
 
 
 end
