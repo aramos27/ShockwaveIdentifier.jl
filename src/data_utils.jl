@@ -1,7 +1,8 @@
-#Extract information from .tape and save as EulerSim
+#Extract information from .tape and save as EulerSim. For .celltape files, use load_cell_data directly.
 function load_sim_data(filename; T=Float64)
 	return Euler2D.load_euler_sim((filename); T)
 end
+
 
 #Returns matrix with pressure data
 function compute_pressure_data(frame, data::EulerSim{2, 4, T}) where {T}
