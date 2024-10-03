@@ -9,7 +9,7 @@ function plot_bounds(sim::EulerSim{N,NAXES,T}) where {N,NAXES,T}
 end
 
 
-# Plots data of 1d case without shockwave
+# Plots data of 1d case without shockwave detection.
 function plotframe1D(frame, data::EulerSim{1, 3, T}, bounds) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
@@ -137,7 +137,7 @@ function plot_1d_heatmap(magnitude, filename::String)
     savefig(heatmap_plot, filename)
 end
 
-#Plots wanted quantity for 2d grid
+#Plots for 2d grid with compute_data_function at data[frame] for a quantity, e.g. pressure.
 function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
@@ -168,10 +168,10 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
     final_plot_layout = plot(heatmap_plot)
 
     # Display and save the plot
-    savefig(final_plot_layout, "plot_frame2d.png")
+    savefig(final_plot_layout, "plot_frame2d_$(frame)_$(header).png")
 end
 
-#Plots heatmap of d1p 
+#Plots heatmap of d1p. Mainly for debug purposes.
 function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     d1p = delta_1p(frame, data)
@@ -182,8 +182,8 @@ function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where 
         xlabel="X-axis", 
         ylabel="Y-axis", 
         color=:viridis,
-        aspect_ratio=1,  # Ensures the heatmap is square
-        #size= (5000,5000)
+        aspect_ratio=1,  # Square heatmap
+        #size= (5000,5000) #5k resolution is too much for the disk.
         )
     plot(delta_1rho_plot)
     filename = joinpath(save_dir, "delta_1p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
@@ -192,7 +192,7 @@ function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where 
 
 end
 
-#Plots heatmap of d2p 
+#Plots heatmap of d2p. Mainly for debug purposes.
 function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
     d2p = delta_2p(frame, data)
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
@@ -255,6 +255,6 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
         print("Vectors")
     end
     final_plot_layout = plot(heatmap_plot)
-    savefig(final_plot_layout, "plot_frame2d_shock.png")
-    savefig(final_plot_layout, "plot_frame2d_shock_zoomable.html")
+    savefig(final_plot_layout, "2d_shock_frame_$(lpad(frame, 3, '0')).png")
+    savefig(final_plot_layout, "2d_shock_zoomable_frame_$(lpad(frame, 3, '0')).html")
 end
