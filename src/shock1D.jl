@@ -80,6 +80,28 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 
 	#This threshold was chosen to eliminate false positives, but not be overly harsh. It can be changed to the approach for 2D as well.
     threshold = 0.5 * (averageGradient(v_data) + maxGradient(v_data))
-	
-	return discontinuities(v_data, threshold)
+	possible_Shocks = discontinuities(v_data, threshold)
+    
+	return possible_Shocks
 end
+
+#=
+    This function iterates over all frames in the given data and finds shock points
+    for each frame using the findShock1D function.
+=#
+function findAllShocks1D(data::EulerSim{1, 3, T}) where{T}
+    shock_points = []
+
+    num_frames = Euler2D.n_tsteps(data)  
+    # Loop over each frame
+    for frame in 1:num_frames
+        # Find shocks for the current frame using the previously defined function
+        shock = findShock1D(frame, data)
+
+        # Append the list of shock points for the current frame to the shock_points list
+        push!(shock_points, shock)
+    end
+
+    return shock_points
+end
+
