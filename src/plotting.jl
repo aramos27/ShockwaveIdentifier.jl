@@ -10,10 +10,11 @@ end
 
 
 # Plots data of 1d case without shockwave detection.
-function plotframe1D(frame, data::EulerSim{1, 3, T}, bounds) where {T}
+function plotframe1D(frame, data::EulerSim{1, 3, T}) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
 	ylabels=[L"ρ", L"ρv", L"ρE"]
+    bounds = plot_bounds(data)
 	ps = [
 		plot(xs, u_data[i, :], legend=(i==1), label=false, ylabel=ylabels[i], xticks=(i==3), xgrid=true, ylims=bounds[i], dpi=600) 
 		for i=1:3]
@@ -30,20 +31,18 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, bounds) where {T}
 	titlestr = @sprintf "n=%d t=%.4e" frame t
 	plot!(ps[1], ps[2], velocity_plot, pressure_plot, suptitle=titlestr, titlefontface="Computer Modern")
 	savefig("plot1d.png")
-    gui()
 end
 
 #=
 	Plot the frame with shockwave detection
 	Using only the velocity data yields good results.
 =#
-function plotframe1D(frame, data::EulerSim{1, 3, T}, bounds, shockwave_algorithm) where {T}
+function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save = false) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
 	ylabels=[L"ρ", L"ρv", L"ρE"]
     ps = []
-
-
+    bounds = plot_bounds(data)
     # Detect the shockwave position using the provided algorithm
     x_shock = shockwave_algorithm(frame, data)
     #x_shock = shockwave_algorithm(v_data)
@@ -93,14 +92,17 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, bounds, shockwave_algorithm
     titlestr = @sprintf "n=%d t=%.4e" frame t
 
     # Plot of a plot
-    plot(ps[1], density_gradient_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
+    fig =  plot(ps[1], density_gradient_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
          suptitle=titlestr, titlefontface="Computer Modern")
+    if save == true
+        savefig(fig, "plot1d_shock")
+    end
+    return fig
 end
 
 function generate_shock_plots1D(filename::String; save_dir::String = "frames", shockwave_algorithm = findShock1D)
     # Load simulation data
     DATA = load_sim_data(filename)
-    boundary = plot_bounds(DATA)
 
     # Generate the current date and time in the desired format
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
@@ -112,7 +114,7 @@ function generate_shock_plots1D(filename::String; save_dir::String = "frames", s
 
     # Generate PNG files sequentially
     for i = 1:DATA.nsteps
-        p = plotframe1D(i, DATA, boundary, shockwave_algorithm)
+        p = plotframe1D(i, DATA, shockwave_algorithm)
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(i, 3, '0')).png")
         savefig(p, filename)
         println("Saved frame $i as $filename")

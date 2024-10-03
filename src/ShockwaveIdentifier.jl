@@ -28,7 +28,7 @@ export findShock2D
 export normalVectors
 
 export plotframe1D
-export plot_bounds
+export generate_shock_plots1D
 export plotframe2D
 
 
