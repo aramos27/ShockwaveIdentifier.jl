@@ -1,16 +1,17 @@
 using ShockwaveIdentifier
 #Example usage for 1D
-#=
+
 #Load data
-data = load_sim_data("dataSim/sod_shock_right_1d.tape")
+data = load_data("dataSim/sod_shock_right_1d.tape")
+#data = load_data("dataSim/sod_shock_left_1d.tape")
 
 #Find shock points at given frame (10 for example)
-shockPoints = findShock1D(10, data)
-#print(shockPoints_1)
+#shockPoints = findShock1D(10, data)
+#print(shockPoints)
 
 #Find shock points for all frames
-shockPoints_all = findAllShocks1D(data)
-#print(shockPoints_1_all)
+#shockPoints_all = findAllShocks1D(data)
+#print(shockPoints_all)
 
 #Plot 1D frame without shock points
 plotframe1D(10, data)
@@ -19,10 +20,10 @@ plotframe1D(10, data)
 plotframe1D(10, data, findShock1D, true)
 
 #Generate png files for each frame #TODO find gif script
-generate_shock_plots1D("dataSim/sod_shock_right_1d.tape")
-=#
+#generate_shock_plots1D("dataSim/sod_shock_right_1d.tape")
 
-#DATA = load_sim_data("dataSim/sod_shock_left_1d.tape")
+
+
 #DATA = load_sim_data("dataSim/sod_shock_right_2d.tape")
 #DATA = load_sim_data("dataSim/sod_shock_orb.tape")
 

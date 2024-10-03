@@ -3,5 +3,5 @@ using Test
 
 @testset "ShockwaveIdentifier.jl" begin
     # Write your tests here.
-    #@test using ShockwaveIdentifier
+    using ShockwaveIdentifier
 end
