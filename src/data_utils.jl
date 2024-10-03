@@ -3,6 +3,16 @@ function load_sim_data(filename; T=Float64)
 	return Euler2D.load_euler_sim((filename); T)
 end
 
+function load_data(filename; T=Float64)
+    if endswith(filename, ".tape")
+        return Euler2D.load_euler_sim(filename; T)
+    elseif endswith(filename, ".celltape")
+        return Euler2D.load_cell_sim(filename)
+    else
+        error("Unsupported file extension. Only '.tape' and '.celltape' files are supported.")
+    end
+end
+
 
 #Returns matrix with pressure data
 function compute_pressure_data(frame, data::EulerSim{2, 4, T}) where {T}
