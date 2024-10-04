@@ -25,6 +25,8 @@ export load_data
 export findShock1D
 export findAllShocks1D
 export findShock2D
+export findAllShocks2D
+
 export normalVectors
 
 export plotframe1D
