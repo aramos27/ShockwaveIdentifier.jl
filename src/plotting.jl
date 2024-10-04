@@ -100,9 +100,9 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     return fig
 end
 
-function generate_shock_plots1D(filename::String; save_dir::String = "frames", shockwave_algorithm = findShock1D)
+function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D) where {T}
     # Load simulation data
-    DATA = load_sim_data(filename)
+    #data = load_sim_data(filename)
 
     # Generate the current date and time in the desired format
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
@@ -113,8 +113,8 @@ function generate_shock_plots1D(filename::String; save_dir::String = "frames", s
     end
 
     # Generate PNG files sequentially
-    for i = 1:DATA.nsteps
-        p = plotframe1D(i, DATA, shockwave_algorithm)
+    for i = 1:data.nsteps
+        p = plotframe1D(i, data, shockwave_algorithm)
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(i, 3, '0')).png")
         savefig(p, filename)
         println("Saved frame $i as $filename")
