@@ -1,6 +1,3 @@
-# At 300K
-const DRY_AIR = CaloricallyPerfectGas(1004.9u"J/kg/K", 717.8u"J/kg/K", 0.0289647u"kg/mol")
-
 """ 
 	Computes the average mean difference across a dataset data (1D!).
 	Used for determining shockwaves by comparing local gradient against average gradient.
