@@ -134,6 +134,10 @@ function generate_shock_plots1D(filename::String; save_dir::String = "frames", s
     # Generate the current date and time in the desired format
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
 
+    if save_dir == "frames"
+        save_dir = "frames/datestr"
+    end
+
     # Create directory if it doesn't exist
     if !isdir(save_dir)
         mkdir(save_dir)
