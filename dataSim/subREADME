@@ -1,0 +1,13 @@
+The following files shall be necessarily in this folder to execute scripts, most probably:
+    sod_shock_orb.tape
+
+The following files shall be in the folder.
+    sod_shock_left_1d.tape
+    sod_shock_right_2d.tape
+    sod_shock_right_1d.tape
+
+    supersonic_shock_1.tape
+    supersonic_shock_2.tape
+    supersonic_shock_3.tape
+
+They shall be excluded from the repo by including them in the .gitignore file.
