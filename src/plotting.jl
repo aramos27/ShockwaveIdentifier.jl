@@ -30,7 +30,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}) where {T}
 	velocity_plot = plot(xs, v_data, ylabel=L"v", legend=false)
 	titlestr = @sprintf "n=%d t=%.4e" frame t
 	plot!(ps[1], ps[2], velocity_plot, pressure_plot, suptitle=titlestr, titlefontface="Computer Modern")
-	savefig("plot1d.png")
+	savefig("plot1d_$(frame).png")
 end
 
 #=
@@ -95,7 +95,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     fig =  plot(ps[1], density_gradient_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
          suptitle=titlestr, titlefontface="Computer Modern")
     if save == true
-        savefig(fig, "plot1d_shock")
+        savefig(fig, "plot1d_shock_$(frame)")
     end
     return fig
 end
