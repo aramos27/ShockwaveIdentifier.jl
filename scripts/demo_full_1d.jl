@@ -4,13 +4,13 @@ using ShockwaveIdentifier
 #Generate png files for each frame 
 #Sod examples
 sod_example_tapes = [
-    "dataSim/sod_shock_left_1d.tape",
-    "dataSim/sod_shock_right_1d.tape"
+    "../dataSim/sod_shock_left_1d.tape",
+    "../dataSim/sod_shock_right_1d.tape"
 ]
 
 for tape in sod_example_tapes
-
-    generate_shock_plots1D(load_data(tape))
+    println("Processing $tape")
+    #generate_shock_plots1D(load_data(tape))
 end
 #Supersonic shock tapes
 supersonic_example_tapes = [
@@ -19,6 +19,7 @@ supersonic_example_tapes = [
     "../dataSim/supersonic_shock_3.tape"
 ]
 for tape in supersonic_example_tapes
+    println("Processing $tape")
     generate_shock_plots1D(load_data(tape))
 end
 
