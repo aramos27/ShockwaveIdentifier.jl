@@ -101,22 +101,21 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 
 	if grad_max == 0unit 
 		# If the density gradient is zero, we use the velocity gradient to detect shocks
-		density_data = u_data[1, :]
+		
 		# Get Velocity out of ConservedProps
 		v_data = map(eachcol(u_data)) do u
 			c = ConservedProps(u)
 			v = velocity(c)[1]
 		end
-		grad_avg = averageGradient(density_data)
-		grad_max = maxGradient(density_data)
-		
+
+		grad_max = maxGradient(v_data)		
 		threshold = 0.5 * (grad_max)
-		possible_Shocks = discontinuities(density_data, threshold)
-		return possible_Shocks
+		return discontinuities(v_data, threshold) #Shockpoint candidates
 	else
+		density_data = u_data[1, :]
+		grad_max = maxGradient(density_data)
 		threshold = 0.5 * (grad_max)
-		possible_Shocks = discontinuities(v_data, threshold)
-		return possible_Shocks
+		return discontinuities(density_data, threshold) #Shockpoint candidates
 	end
 end
 
