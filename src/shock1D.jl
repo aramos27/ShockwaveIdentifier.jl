@@ -82,12 +82,29 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
         c = ConservedProps(u)
         v = velocity(c)[1]
     end
+	
+	grad_max = maxGradient(v_data)
+	grad_avg = averageGradient(v_data)
 
-	#This threshold was chosen to eliminate false positives, but not be overly harsh. It can be changed to the approach for 2D as well.
-    threshold = 0.5 * (averageGradient(v_data) + maxGradient(v_data))
-	possible_Shocks = discontinuities(v_data, threshold)
-    
-	return possible_Shocks
+	unit = u"1"
+	try
+		unit = Unitful.unit(grad_avg)
+	catch 
+		println("Dimensionless data, or corruptes data? ")
+	end
+
+	if grad_max == 0unit 
+		density_data = u_data[1, :]
+		grad_avg = averageGradient(density_data)
+		grad_max = maxGradient(density_data)
+		threshold = 0.5 * (grad_avg + grad_max)
+		possible_Shocks = discontinuities(density_data, threshold)
+		return possible_Shocks
+	else
+		threshold = 0.5 * (grad_avg + grad_max)
+		possible_Shocks = discontinuities(v_data, threshold)
+		return possible_Shocks
+	end
 end
 
 """
