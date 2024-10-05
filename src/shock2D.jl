@@ -255,9 +255,9 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = 0.1, eps2::T = 10e-4) w
                     blanked[i, j] = 1
                     
                     shock_counter += 1
-                    #println("Shock with d1p $(d1p[i,j]) and d2p $(d2p[i,j]) at $i $j")
+                    #println("Shock with d1p $(d1p[i,j]) and d2p $(d2p[i,j]) at $i $j") #debug print
                 else
-                    #println("Potential Shock with d1p $(d1p[i,j]) and d2p $(d2p[i,j]) at $i $j") 
+                    #println("Potential Shock with d1p $(d1p[i,j]) and d2p $(d2p[i,j]) at $i $j") #debug print
                 end
             else
                 blanked[i, j] = 0

@@ -291,9 +291,11 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
     # Overlay shock points on both plots
     scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=2, marker=:cross)
 
+    #=
     if vectors
-        print("Vectors")
+        @info "Vectors in plotframe2D"
     end
+    =#
     final_plot_layout = plot(heatmap_plot)
     savefig(final_plot_layout, "2d_shock_frame_$(lpad(frame, 3, '0')).png")
     savefig(final_plot_layout, "2d_shock_zoomable_frame_$(lpad(frame, 3, '0')).html")

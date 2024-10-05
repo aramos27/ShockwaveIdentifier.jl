@@ -9,8 +9,7 @@ function averageGradient(data)
 	try
 		unit = Unitful.unit(data[1])
 	catch 
-		println("Dimensionless data, or corruptes data? ")
-
+		@warn "Dimensionless data, or corruptes data? Unitful.unit could not be applied."
 	end
 
 	divergence = 0unit
@@ -35,14 +34,13 @@ function maxGradient(data)
 	try
 		unit = Unitful.unit(data[1])
 	catch 
-		println("Dimensionless data, or corruptes data? ")
-
+		@warn "Dimensionless data, or corruptes data? Unitful.unit could not be applied."
 	end
+
 	maximum_gradient = 0unit
 	for i in eachindex(data)[1:end-1]
 		if abs(data[i+1] - data[i]) > maximum_gradient
 			maximum_gradient = abs(data[i+1] - data[i])
-			#cprint(" Shockwave detected at ", i)
 		end
 	end
 	return maximum_gradient
@@ -58,7 +56,6 @@ function discontinuities(data, threshold)
     for (i, difference) in enumerate(gradient)
         if abs(difference) >= threshold
             push!(indices, i)
-            # println("Shockwave detected at index ", i)
         end
     end
 
@@ -90,7 +87,7 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 	try
 		unit = Unitful.unit(grad_avg)
 	catch 
-		println("Dimensionless data, or corruptes data? ")
+		@warn "Dimensionless data, or corruptes data? Unitful.unit could not be applied."
 	end
 
 	if grad_max == 0unit 

@@ -32,7 +32,6 @@ function compute_velocity_data(frame, data::EulerSim{2, 4, T}) where {T}
     (t, u_data) = nth_step(data, frame)
     velocity_data = map(eachslice(u_data; dims=(2,3))) do u
         c = ConservedProps(u[1:end])
-        #print(velocity(c, DRY_AIR))
         return velocity(c, DRY_AIR)
     end
 
@@ -58,7 +57,6 @@ function normalized_velocity(frame, data::EulerSim{2, 4, T}) where {T}
     for i in 1:size(velocity_xy, 1)  # Iterate over rows
         for j in 1:size(velocity_xy, 2)  # Iterate over columns
             element = velocity_xy[i, j]
-            #print(element)
             magnitude = sqrt(element[1]^2 + element[2]^2)
             if magnitude != 0u"m/s"  # Compare magnitude to zero with units
                 velocity_xy[i, j] = (element / (magnitude * u"1"))u"m/s"  # Normalize with units
