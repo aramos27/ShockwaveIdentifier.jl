@@ -1,9 +1,8 @@
 using ShockwaveIdentifier
 
 """1D Case"""
-"""
-Load Data
-"""
+
+#Load data
 #data_1 = load_data("dataSim/sod_shock_left_1d.tape")
 #data_1 = load_data("dataSim/sod_shock_right_1d.tape")
 
