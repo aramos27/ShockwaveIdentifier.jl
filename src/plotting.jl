@@ -129,20 +129,26 @@ Input arguments:
 """
 function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D) where {T}
 
-    # Load simulation data
-    #data = load_sim_data(filename)
+    @info "Generating shock plots in 1D"
 
     # Generate the current date and time in the desired format
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
 
-    if save_dir == "frames"
-        save_dir = "frames/$datestr"
-    end
 
-    # Create directory if it doesn't exist
+
+    # Create general output directory if it doesn't exist
     if !isdir(save_dir)
         mkdir(save_dir)
     end
+    # Create time-stamped directory if outputting to frames folder
+    if save_dir == "frames"
+        save_dir = "frames/$datestr"
+    end
+    if !isdir(save_dir)
+        mkdir(save_dir)
+    end
+
+    @info "Created folder $save_dir"
 
     # Generate PNG files sequentially
     for i = 1:data.nsteps
