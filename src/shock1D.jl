@@ -109,6 +109,7 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 	v_norm = normalize(v_data)
 
 	if grad_max == 0unit 
+		@info "Gradient of density is zero. Switching to velocity-based approach."
 		# If the density gradient is zero, we use the velocity gradient to detect shocks
 		grad_max = maxGradient(v_data)		
 		threshold = 0.5 * (grad_max)
@@ -121,7 +122,11 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 		push!(d1p,0)
 
 		grad_max = maximum(d1p)
+		@info "Max d1p: " maximum(d1p)
+
 		threshold = 0.5 * (grad_max) #find some formula for the threshold. like this, it seems to work.
+
+		@info "Threshold: " threshold
 
 		shock_points = findall(x->abs(x) > threshold, d1p)
 		return shock_points #Shockpoint candidates
