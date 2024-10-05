@@ -59,6 +59,20 @@ function discontinuities(data, threshold)
         end
     end
 
+
+	#=
+	If too many points above threshold present in the current frame, we suspect a malfunction. This potentially prohibits the detection of complicated shocks. For 1D, it should be fine.
+	=#
+	n_shocks = size(indices)[1]
+	n_points = size(data)[1]
+	ϵ_no_shocks = 0.2 # when more then 20% of all points are shocks, something is wrong.
+	if n_shocks/n_points > ϵ_no_shocks
+		indices = []
+	end
+
+	#If maximum gradient is not deviating too much from the average gradient, we will also suspect something is wrong.
+	#Not implemented yet - necessary?
+
     return indices
 end
 
@@ -73,15 +87,10 @@ Input arguments:
 """
 function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
     (t, u_data) = nth_step(data, frame)
-
-    # Get Velocity out of ConservedProps
-    v_data = map(eachcol(u_data)) do u
-        c = ConservedProps(u)
-        v = velocity(c)[1]
-    end
 	
-	grad_max = maxGradient(v_data)
-	grad_avg = averageGradient(v_data)
+	#Density data is u_data[]
+	grad_max = maxGradient(u_data[1, :])
+	grad_avg = averageGradient(u_data[1, :])
 
 	unit = u"1"
 	try
@@ -91,16 +100,21 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 	end
 
 	if grad_max == 0unit 
-		# If the velocity gradient is zero, we use the density gradient to detect shocks
+		# If the density gradient is zero, we use the velocity gradient to detect shocks
 		density_data = u_data[1, :]
+		# Get Velocity out of ConservedProps
+		v_data = map(eachcol(u_data)) do u
+			c = ConservedProps(u)
+			v = velocity(c)[1]
+		end
 		grad_avg = averageGradient(density_data)
 		grad_max = maxGradient(density_data)
 		
-		threshold = 0.5 * (grad_avg + grad_max)
+		threshold = 0.5 * (grad_max)
 		possible_Shocks = discontinuities(density_data, threshold)
 		return possible_Shocks
 	else
-		threshold = 0.5 * (grad_avg + grad_max)
+		threshold = 0.5 * (grad_max)
 		possible_Shocks = discontinuities(v_data, threshold)
 		return possible_Shocks
 	end
