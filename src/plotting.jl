@@ -136,7 +136,7 @@ function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "fra
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
 
     if save_dir == "frames"
-        save_dir = "frames/datestr"
+        save_dir = "frames/$datestr"
     end
 
     # Create directory if it doesn't exist
