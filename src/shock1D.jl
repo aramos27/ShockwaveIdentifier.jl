@@ -118,7 +118,7 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 		density_data = u_data[1, :]
 
 		#analogue aproach to 2D: We compare the gradient of density multiplied by normalized velocity
-		d1p = diff(density_data) .* v_norm[1:(end-1)]
+		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end-1)])
 		push!(d1p,0)
 
 		grad_max = maximum(d1p)
