@@ -67,6 +67,7 @@ function discontinuities(data, threshold)
 	n_points = size(data)[1]
 	ϵ_no_shocks = 0.2 # when more then 20% of all points are shocks, something is wrong.
 	if n_shocks/n_points > ϵ_no_shocks
+		@warn "Too many shock points, not physically feasible! Treated as malfunctioning frame."
 		indices = []
 	end
 
@@ -99,23 +100,31 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 		@warn "Dimensionless data, or corruptes data? Unitful.unit could not be applied."
 	end
 
+	# Get Velocity out of ConservedProps
+	v_data = map(eachcol(u_data)) do u
+		c = ConservedProps(u)
+		v = velocity(c)[1]
+	end
+	v_data = ustrip.(v_data)
+	v_norm = normalize(v_data)
+
 	if grad_max == 0unit 
 		# If the density gradient is zero, we use the velocity gradient to detect shocks
-		
-		# Get Velocity out of ConservedProps
-		v_data = map(eachcol(u_data)) do u
-			c = ConservedProps(u)
-			v = velocity(c)[1]
-		end
-
 		grad_max = maxGradient(v_data)		
 		threshold = 0.5 * (grad_max)
 		return discontinuities(v_data, threshold) #Shockpoint candidates
 	else
 		density_data = u_data[1, :]
-		grad_max = maxGradient(density_data)
-		threshold = 0.5 * (grad_max)
-		return discontinuities(density_data, threshold) #Shockpoint candidates
+
+		#analogue aproach to 2D: We compare the gradient of density multiplied by normalized velocity
+		d1p = diff(density_data) .* v_norm[1:(end-1)]
+		push!(d1p,0)
+
+		grad_max = maximum(d1p)
+		threshold = 0.5 * (grad_max) #find some formula for the threshold. like this, it seems to work.
+
+		shock_points = findall(x->abs(x) > threshold, d1p)
+		return shock_points #Shockpoint candidates
 	end
 end
 

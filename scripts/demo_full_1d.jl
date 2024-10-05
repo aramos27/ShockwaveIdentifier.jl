@@ -10,7 +10,7 @@ sod_example_tapes = [
 
 for tape in sod_example_tapes
     println("Processing $tape")
-    #generate_shock_plots1D(load_data(tape))
+    generate_shock_plots1D(load_data(tape))
 end
 #Supersonic shock tapes
 supersonic_example_tapes = [

@@ -97,19 +97,24 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     density_gradient = diff(u_data[1, :])
     density_gradient_plot = plot(gradient_xs, density_gradient, ylabel=L"\nabla ρ", legend=false)
 
-    # Plotting
-    scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], label="Shockwave", color="orange")
-    scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], label="Shockwave", color="orange")
+    # d1p: density * velocity_norm
+    d1p = density_gradient .* normalize(ustrip.(v_data)[1:(end-1)])
+    
+    d1p_plot = plot(gradient_xs, d1p, ylabel=L"δ_1_ρ", legend=false)
 
+    # Plotting
+    scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], markersize=1, label="Shockwave", color="orange")
+    scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
+    scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
    
     titlestr = @sprintf "n=%d t=%.4e" frame t
 
     """Plot the plots to a fig object. If debug, plot all. if no debug, only plot density + gradient. """
     if debug
-        fig =  plot(ps[1], density_gradient_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
+        fig =  plot(ps[1], density_gradient_plot, d1p_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
             suptitle=titlestr, titlefontface="Computer Modern")
     else
-        fig = plot(ps[1], density_gradient_plot,suptitle=titlestr, titlefontface="Computer Modern")
+        fig = plot(ps[1], density_gradient_plot, d1p_plot, suptitle=titlestr, titlefontface="Computer Modern")
     end
     if save == true
         savefig(fig, "plot1d_shock_$(frame)")
@@ -133,8 +138,6 @@ function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "fra
 
     # Generate the current date and time in the desired format
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
-
-
 
     # Create general output directory if it doesn't exist
     if !isdir(save_dir)
