@@ -1,3 +1,4 @@
 /Manifest.toml
 *.tape
 *.celltape
+/scripts/frames
