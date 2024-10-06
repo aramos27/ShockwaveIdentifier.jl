@@ -79,7 +79,8 @@ end
 
 """
 Our developed approach to detect shock wave points in 1D, based on a simple approach with a gradient threshold.
-The gradient threshold is the mean of the average value of all non-zero gradient values and the maximum gradient value, which manages to detect all shocks in the test cases that we have received and to ignore high gradients caused by expansion waves, which can be visualized through the debug flag of generate_shock_plots1D.
+The gradient threshold is the maximum gradient value multiplied by a constant around 0.5, which manages to detect all shocks in the test cases that we have received and to ignore high gradients caused by expansion waves, which can be visualized through the debug flag of generate_shock_plots1D.
+We compare the weighted density gradient (density gradient multiplied by velocity) and velocity gradient. Both need to be above the threshold to suffice our shock condition. 
 
 Input arguments:
 	- frame: the frame-th step that of the simulation object that shall be processed.
@@ -109,12 +110,28 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 	v_norm = normalize(v_data)
 
 	if grad_max != 0unit 
-		@info "Gradient of density is zero. Switching to velocity-based approach."
-		# If the density gradient is zero, we use the velocity gradient to detect shocks
-		grad_max = maxGradient(v_data)		
-		threshold = 0.5 * (grad_max)
-		return discontinuities(v_data, threshold) #Shockpoint candidates
+		
+		@warn "the density gradient is zero, use the velocity gradient to detect shocks"
+		grad_max_v = maxGradient(v_data)		
+		threshold_v = 0.5 * (grad_max_v)
+		shock_points_v = findall(x->abs(x) > threshold_v, v_data)
+
+		density_data = u_data[1, :]
+		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end-1)])
+		push!(d1p,0)
+		grad_max_dp = maximum(d1p)
+		threshold = 0.5 * (grad_max_dp)
+		shock_points_d1p = findall(x->abs(x) > threshold, d1p)
+		shock_points = []
+		for sp_v in shock_points_v
+			if sp_v in shock_points_d1p
+				push!(shock_points, sp_v)
+			end
+		end
+
+		return shock_points #Shockpoint candidates
 	else
+		@info "Gradient of density is zero. Switching to approach based on 2D."
 		density_data = u_data[1, :]
 
 		#analogue aproach to 2D: We compare the gradient of density multiplied by normalized velocity
