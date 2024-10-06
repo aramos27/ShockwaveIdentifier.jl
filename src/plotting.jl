@@ -103,9 +103,11 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     d1p_plot = plot(gradient_xs, d1p, ylabel=L"δ_1_ρ", legend=false)
 
     # Plotting
-    scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], markersize=1, label="Shockwave", color="orange")
+    plot!(pressure_gradient_plot, [xs[x_shock], xs[x_shock]], [minimum(pressure_gradient), maximum(pressure_gradient)], label="Shockwave", color="orange", linewidth=2, linestyle=:dash, alpha=0.5)
+    plot!(d1p_plot, [xs[x_shock], xs[x_shock]], [minimum(d1p), maximum(d1p)], label="Shockwave", color="orange", linewidth=2, linestyle=:dash, alpha=0.5)
+    plot!(density_gradient_plot, [xs[x_shock], xs[x_shock]], [minimum(density_gradient), maximum(density_gradient)], label="Shockwave", color="orange", linewidth=2, linestyle=:dash, alpha=0.5)
     scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
-    scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
+
    
     titlestr = @sprintf "n=%d t=%.4e" frame t
 
