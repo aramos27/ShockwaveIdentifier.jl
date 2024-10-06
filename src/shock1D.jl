@@ -108,7 +108,7 @@ function findShock1D(frame, data::EulerSim{1, 3, T}) where{T}
 	v_data = ustrip.(v_data)
 	v_norm = normalize(v_data)
 
-	if grad_max == 0unit 
+	if grad_max != 0unit 
 		@info "Gradient of density is zero. Switching to velocity-based approach."
 		# If the density gradient is zero, we use the velocity gradient to detect shocks
 		grad_max = maxGradient(v_data)		
