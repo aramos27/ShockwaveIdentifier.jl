@@ -64,7 +64,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     for i = 1:3
         p = plot(xs, u_data[i, :], legend=(i==1), label=false, ylabel=ylabels[i],
                  xticks=(i==3), xgrid=true, ylims=bounds[i], dpi=600)
-        scatter!(p, [xs[x_shock]], [u_data[i, x_shock]], label="Shockwave", color="orange")
+        #!(p, [xs[x_shock]], [u_data[i, x_shock]], label="Shockwave", color="orange")
         push!(ps, p)
     end
 
@@ -82,11 +82,11 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
 
     # Pressure
     pressure_plot = plot(xs, p_data, ylabel=L"P", legend=false)
-    scatter!(pressure_plot, [xs[x_shock]], [p_data[x_shock]], label="Shockwave", color="orange")
+    scatter!(pressure_plot, [xs[x_shock]], [p_data[x_shock]], label="Shockwave",markersize=1, color="orange")
 
     # Velocity
     velocity_plot = plot(xs, v_data, ylabel=L"v", legend=false)
-    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], label="Shockwave", color="orange")
+    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], label="Shockwave",markersize=1, color="orange")
 
     # Gradient Pressure
     pressure_gradient = diff(p_data)
@@ -103,7 +103,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     d1p_plot = plot(gradient_xs, d1p, ylabel=L"δ_1_ρ", legend=false)
 
     # Plotting
-    scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], markersize=1, label="Shockwave", color="orange")
+    scatter!(velocity_plot, [xs[x_shock]], [velocity[x_shock]], markersize=1, label="Shockwave", color="orange")
     scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
     scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
    
@@ -114,7 +114,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
         fig =  plot(ps[1], density_gradient_plot, d1p_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
             suptitle=titlestr, titlefontface="Computer Modern")
     else
-        fig = plot(ps[1], density_gradient_plot, d1p_plot, suptitle=titlestr, titlefontface="Computer Modern")
+        fig = plot(ps[1], density_gradient_plot, d1p_plot, velocity_plot, suptitle=titlestr, titlefontface="Computer Modern")
     end
     if save == true
         savefig(fig, "plot1d_shock_$(frame)")
