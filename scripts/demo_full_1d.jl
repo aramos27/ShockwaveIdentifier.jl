@@ -1,30 +1,19 @@
 using ShockwaveIdentifier
-#Example usage for 1D
+using Base.Threads
 
-#Generate png files for each frame 
-#Sod examples
-sod_example_tapes = [
-    "../dataSim/sod_shock_left_1d.tape",
-    "../dataSim/sod_shock_right_1d.tape"
-]
-
-for tape in sod_example_tapes
-    println("Processing $tape")
-    generate_shock_plots1D(load_data(tape))
-end
-#Supersonic shock tapes
-supersonic_example_tapes = [
-    "../dataSim/supersonic_shock_1.tape"
-    "../dataSim/supersonic_shock_2.tape"
+# Example usage for 1D
+example_tapes = [
+    # Sod examples
+    #"../dataSim/sod_shock_left_1d.tape",
+    #"../dataSim/sod_shock_right_1d.tape",
+    # Supersonic shock tapes
+    #"../dataSim/supersonic_shock_1.tape",
+    "../dataSim/supersonic_shock_2.tape",
     "../dataSim/supersonic_shock_3.tape"
 ]
-for tape in supersonic_example_tapes
-    println("Processing $tape")
+
+# Parallelize the processing of tapes
+@threads for tape in example_tapes
+    println("Processing $tape on thread $(threadid())")
     generate_shock_plots1D(load_data(tape))
 end
-
-
-
-
-
-
