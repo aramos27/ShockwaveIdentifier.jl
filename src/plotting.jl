@@ -262,7 +262,7 @@ plotframe2D function to plot 2d frames including shock points and possibly norma
 function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm , vectors = false) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
-    shock_points = shockwave_algorithm(frame, data)
+    shocklist = shockwave_algorithm(frame, data)
     plot_data = compute_data_function(frame, data)
 
     # Determine the header based on the data's units
@@ -291,8 +291,8 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
     
 
     # Extract shock point coordinates
-    shock_xs = [xs[i] for (i, j) in shock_points]
-    shock_ys = [ys[j] for (i, j) in shock_points]
+    shock_xs = [xs[i] for (i, j) in shocklist]
+    shock_ys = [ys[j] for (i, j) in shocklist]
 
     # Overlay shock points on both plots
     scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=0.25, marker=:cross)
@@ -304,6 +304,8 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
         Used in the subsequent quiver plot to determine how few arrows are plotted. higher density -> lower amount of arrows, contraintuitively.
         Set to 1 to see all arrows. 
         """
+
+        shock_dir = normalVectors(frame,data,shocklist)
         arrow_density = 10
         
         if arrow_density < 1
@@ -329,4 +331,13 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
     final_plot_layout = plot(heatmap_plot)
     savefig(final_plot_layout, "2d_shock_frame_$(lpad(frame, 3, '0')).png")
     savefig(final_plot_layout, "2d_shock_zoomable_frame_$(lpad(frame, 3, '0')).html")
+end
+
+""" 
+Analogue to 1D function
+"""
+function generate_shock_plots2D(data::EulerSim{2, 4, T}; save_dir::String = "frames", shockwave_algorithm = findShock2D) where {T}
+    for step in 1:data.nsteps
+        plotframe2D(step,data,compute_density_data,findShock2D, true)
+    end
 end
