@@ -292,7 +292,7 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
     shock_ys = [ys[j] for (i, j) in shock_points]
 
     # Overlay shock points on both plots
-    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=2, marker=:cross)
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=0.25, marker=:cross)
 
     #=
     if vectors
