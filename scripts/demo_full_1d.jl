@@ -12,7 +12,6 @@ example_tapes = [
     "../dataSim/supersonic_shock_3.tape"
 ]
 
-# Parallelize the processing of tapes
 for tape in example_tapes
     println("Processing $tape on thread $(threadid())")
     generate_shock_plots1D(load_data(tape))
