@@ -103,7 +103,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save =
     d1p_plot = plot(gradient_xs, d1p, ylabel=L"δ_1_ρ", legend=false)
 
     # Plotting
-    scatter!(velocity_plot, [xs[x_shock]], [velocity[x_shock]], markersize=1, label="Shockwave", color="orange")
+    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
     scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
     scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
    
@@ -214,6 +214,47 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
     savefig(final_plot_layout, "plot_frame2d_$(frame)_$(header).png")
 end
 
+#Plots heatmap of d1p. Mainly for debug purposes.
+function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+    datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
+    d1p = delta_1p(frame, data)
+    #Plotting
+    delta_1rho_plot = heatmap(
+        d1p, 
+        title="δ_1ρ step $frame", 
+        xlabel="X-axis", 
+        ylabel="Y-axis", 
+        color=:viridis,
+        aspect_ratio=1,  # Square heatmap
+        #size= (5000,5000) #5k resolution is too much for the disk.
+        )
+    plot(delta_1rho_plot)
+    filename = joinpath(save_dir, "delta_1p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
+    savefig(delta_1rho_plot, filename)
+
+
+end
+
+#Plots heatmap of d2p. Mainly for debug purposes.
+function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+    d2p = delta_2p(frame, data)
+    datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
+    #Plotting
+    delta_2rho_plot = heatmap(
+        d2p, 
+        title="δ_2ρ step $frame", 
+        xlabel="X-axis", 
+        ylabel="Y-axis", 
+        color=:viridis,
+        aspect_ratio=1,  # Ensures the heatmap is square
+        #size= (5000,5000)
+        )
+        
+    plot(delta_2rho_plot)
+    filename = joinpath(save_dir, "delta_2p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
+    savefig(delta_2rho_plot, filename)
+
+end
 
 function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm , vectors = false) where {T}
     (t, u_data) = nth_step(data, frame)
