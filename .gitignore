@@ -2,3 +2,5 @@
 *.tape
 *.celltape
 /scripts/frames
+*.png
+*.html
