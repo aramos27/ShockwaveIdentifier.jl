@@ -132,7 +132,7 @@ Input arguments:
 - shockwave_algorithm: The function that detects the shock points. E.g. findShock1D Shall take the arguments:
     Shall return a list of indices where shockpoints are assumed.
 """
-function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D) where {T}
+function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false) where {T}
 
     @info "Generating shock plots in 1D"
 
@@ -149,15 +149,19 @@ function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "fra
     end
     if !isdir(save_dir)
         mkdir(save_dir)
+        @info "Created folder $save_dir"
     end
 
-    @info "Created folder $save_dir"
+    
 
     # Generate PNG files sequentially
     for i = 1:data.nsteps
         p = plotframe1D(i, data, shockwave_algorithm)
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(i, 3, '0')).png")
         savefig(p, filename)
+        if html
+            @info "HTML NOT SUPPORTED YET. Write your own addon, please"
+        end
         @info "Saved frame $i as $filename"
     end
 end
@@ -209,9 +213,8 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
     #Plotting
     heatmap_plot = heatmap(xs, ys, plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
     final_plot_layout = plot(heatmap_plot)
-
-    # Display and save the plot
-    savefig(final_plot_layout, "plot_frame2d_$(frame)_$(header).png")
+    return final_plot_layout
+    #THIS RETURNS A PLOT OBJECT; THE PLOT IS NOT SAVED IN A FILE
 end
 
 #Plots heatmap of d1p. Mainly for debug purposes.
@@ -259,7 +262,7 @@ end
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
 """
-function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm , vectors = false) where {T}
+function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm; vectors = false) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
     shocklist = shockwave_algorithm(frame, data)
@@ -311,7 +314,9 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
         if arrow_density < 1
             arrow_density = 1
         end
+
         quiver!(
+            heatmap_plot,
             [p[1] for p in shocklist[1:arrow_density:end]], 
             [p[2] for p in shocklist[1:arrow_density:end]], 
             quiver=( [-10 .* n[1] for n in shock_dir[1:arrow_density:end]], [-10 .* n[2] for n in shock_dir[1:arrow_density:end]]), 
@@ -320,24 +325,48 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shoc
             title= "Suggested Shocks with directions step $frame",
             xlabel="X", ylabel="Y", 
             size = (1000,1000),
-            
+            z=1,            
             arrow=Plots.arrow(:closed, :head,0.1, 0.1),
                 )
-            
-            
+                       
             
     end
     
     final_plot_layout = plot(heatmap_plot)
-    savefig(final_plot_layout, "2d_shock_frame_$(lpad(frame, 3, '0')).png")
-    savefig(final_plot_layout, "2d_shock_zoomable_frame_$(lpad(frame, 3, '0')).html")
+    return final_plot_layout
+        #THIS RETURNS A PLOT OBJECT; THE PLOT IS NOT SAVED IN A FILE
 end
 
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::EulerSim{2, 4, T}; save_dir::String = "frames", shockwave_algorithm = findShock2D) where {T}
+function generate_shock_plots2D(data::EulerSim{2, 4, T}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) where {T}
+    @info "Generating shock plots in 2D"
+
+    # Generate the current date and time in the desired format
+    datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
+
+    # Create general output directory if it doesn't exist
+    if !isdir(save_dir)
+        mkdir(save_dir)
+    end
+    # Create time-stamped directory if outputting to frames folder
+    if save_dir == "frames"
+        save_dir = "frames/$datestr"
+    end
+    if !isdir(save_dir)
+        mkdir(save_dir)
+    end
+
     for step in 1:data.nsteps
-        plotframe2D(step,data,compute_density_data,findShock2D, true)
+        final_plot_layout = plotframe2D(step,data,compute_density_data,findShock2D; vectors=vectors)
+
+        filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
+
+        savefig(final_plot_layout, "$(filename).png")
+        if html
+            savefig(final_plot_layout, "$(filename)_zoomable.html")
+        end
+        @info "Saved frame $step as $filename"
     end
 end
