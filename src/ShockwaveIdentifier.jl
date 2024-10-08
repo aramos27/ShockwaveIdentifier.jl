@@ -31,6 +31,7 @@ export normalVectors
 
 export plotframe1D
 export generate_shock_plots1D
+export generate_shock_plots2D
 export plotframe2D
 
 

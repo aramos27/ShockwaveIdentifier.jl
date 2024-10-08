@@ -1,7 +1,7 @@
 using ShockwaveIdentifier
 
 example_tapes = [
-    "../dataSim/sod_shock_orb.tape"
+    "dataSim/sod_shock_orb.tape"
 ]
 
 for tape in example_tapes
