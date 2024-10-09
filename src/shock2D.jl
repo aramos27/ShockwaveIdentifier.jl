@@ -127,11 +127,13 @@ function find_zeros!(discret)
     elseif ndims(discret) == 2
         rows, cols = size(discret)
         
-        # Efficient handling for 2D array
         for i in 1:rows
             for j in 2:cols
+                #If sign changes along j axis
                 if signbit(discret[i, j]) != signbit(discret[i, j-1])
+                    #if values are not zero yet - is this necessary 100%?
                     if discret[i, j] != 0 && discret[i, j-1] != 0
+                        #make values zero
                         discret[i, j] = 0
                         discret[i, j-1] = 0
                     end
@@ -141,6 +143,7 @@ function find_zeros!(discret)
 
         for j in 1:cols
             for i in 2:rows
+                #if sign changes along y axis
                 if signbit(discret[i, j]) != signbit(discret[i-1, j])
                     if discret[i, j] != 0 && discret[i-1, j] != 0
                         discret[i, j] = 0
@@ -150,7 +153,9 @@ function find_zeros!(discret)
             end
         end
     else
-        error("Input must be either a 1D or 2D array.")
+        @error "Input must be either a 1D or 2D array."
+        #do nothing
+        return
     end
     return 
 end
