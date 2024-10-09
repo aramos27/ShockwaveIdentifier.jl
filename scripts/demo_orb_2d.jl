@@ -1,10 +1,9 @@
 using ShockwaveIdentifier
 
-example_tapes = [
-    "dataSim/sod_shock_orb.tape"
-]
-
-for tape in example_tapes
-    println("Processing $tape ")#on thread $(threadid())")
-    generate_shock_plots2D(load_data(tape))
-end
+#Tape file location
+tape = "dataSim/sod_shock_orb.tape"
+#import tape file as data object
+data = load_data(tape)
+println("Processing $tape ")
+#Find shock waves and plot them directly in the pre-set folder /frames/date-hours-minutes-seconds
+generate_shock_plots2D(data)
