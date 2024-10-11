@@ -1,5 +1,13 @@
 
+#GLOBAL VARIABLES UNUSED FOR NOW.
+YBOUNDS_1D = [
+    0.1, 0.1, 0.1, 0.1
+]
+#y axis boundary for 1d plots
 
+BOUNDS_2D = [
+    0., 0., 1., 1.
+]
 
 """
 Returns plot boundaries of the simulation object sim for 1D case. (Used in plotframe)
@@ -12,6 +20,7 @@ function plot_bounds(sim::EulerSim{N,NAXES,T}) where {N,NAXES,T}
 		return (mid-1.1*diffhalf, mid+1.1*diffhalf)
 	end
 end
+
 
 
 """ 
@@ -104,7 +113,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
 
     # Gradient Density
     density_gradient = diff(u_data[1, :])
-    density_gradient_plot = plot(gradient_xs, density_gradient, ylabel=L"\nabla ρ", legend=false)
+    density_gradient_plot = plot(gradient_xs, density_gradient, ylabel=L"\nabla ρ",  legend=false)
 
     # d1p: density * velocity_norm
     d1p = density_gradient .* normalize(ustrip.(v_data)[1:(end-1)])
@@ -225,7 +234,7 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
     #THIS RETURNS A PLOT OBJECT; THE PLOT IS NOT SAVED IN A FILE
 end
 
-#Plots heatmap of d1p. Mainly for debug purposes.
+#Plots heatmap of d1p. Mainly for debug purposes. Returns nothing!"
 function plot_d1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, save_dir::AbstractString) where {T}
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     d1p = delta_1p(frame, data)
@@ -237,16 +246,16 @@ function plot_d1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, sav
         ylabel="Y-axis", 
         color=:viridis,
         aspect_ratio=1,  # Square heatmap
-        #size= (5000,5000) #5k resolution is too much for the disk.
+        size= (5000,5000) #5k resolution is too much for the disk.
         )
     plot(delta_1rho_plot)
     filename = joinpath(save_dir, "delta_1p_$(datestr)_frame_$(lpad(frame, 3, '0')).png")
     savefig(delta_1rho_plot, filename)
 
-
+    return 1
 end
 
-#Plots heatmap of d2p. Mainly for debug purposes.
+#Plots heatmap of d2p. Mainly for debug purposes. Returns nothing!"
 function plot_d2p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, save_dir::AbstractString) where {T}
     d2p = delta_2p(frame, data)
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
@@ -258,7 +267,7 @@ function plot_d2p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, sav
         ylabel="Y-axis", 
         color=:viridis,
         aspect_ratio=1,  # Ensures the heatmap is square
-        #size= (5000,5000)
+        size= (5000,5000)
         )
         
     plot(delta_2rho_plot)
