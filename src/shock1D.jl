@@ -89,7 +89,7 @@ Input arguments:
     Shall return a list of indices where shockpoints are assumed.
 
 """
-function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=0.5) where{T}
+function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
     (t, u_data) = nth_step(data, frame)
 	
 	#Density data is u_data[]
@@ -158,14 +158,14 @@ end
     This function iterates over all frames in the given data and finds shock points
     for each frame of the simulation object data::EulerSim{1, 3, T} using the findShock1D function.
 """
-function findAllShocks1D(data::EulerSim{1, 3, T}) where{T}
+function findAllShocks1D(data::EulerSim{1, 3, T}, threshold = eps_1d) where{T}
     shock_points = []
 
     num_frames = Euler2D.n_tsteps(data)  
     # Loop over each frame
     for frame in 1:num_frames
         # Find shocks for the current frame using the previously defined function
-        shock = findShock1D(frame, data)
+        shock = findShock1D(frame, data, threshold=threshold)
 
         # Append the list of shock points for the current frame to the shock_points list
         push!(shock_points, shock)
