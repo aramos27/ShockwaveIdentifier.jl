@@ -160,3 +160,7 @@ end
 function ustrip(matrix::Matrix{Union{Nothing, Unitful.Quantity{T, D, U}}}) where {T, D, U}
     return map(x -> x === nothing ? nothing : Unitful.ustrip(x), matrix)
 end
+
+function ustrip(value::Union{Nothing, Unitful.Quantity{T, D, U}}) where {T, D, U}
+    return  value === nothing ? nothing : Unitful.ustrip(value)
+end
