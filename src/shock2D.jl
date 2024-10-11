@@ -293,7 +293,7 @@ function findShock2D(frame, data::EulerSim{2,4,T}) where {T}
     #The coordinates where we detect a shock condition are put into the array shocklist.
     shocklist = []
     for i in 1:size(blanked, 1)
-        for j in 1:size(blank, 2)
+        for j in 1:size(blanked, 2)
             if blanked[i, j] == true
                 push!(shocklist, (i, j))
             end
