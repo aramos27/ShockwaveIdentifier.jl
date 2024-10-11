@@ -49,15 +49,21 @@ end
     - shockwave_algorithm: function to determine shocks and takes frame, data as input arguments.
     - save: Flag whether the figures shall be stored directly.
     - debug: All plots or only density + ∇ density plots, which show shockpoints sufficiently.
+    - threshold: value passed onto shockwave_algorithm as argument
 """
-function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save = false, debug = false) where {T}
+function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = false, debug = false, threshold = 0.5) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
 	ylabels=[L"ρ", L"ρv", L"ρE"]
     ps = []
     bounds = plot_bounds(data)
+    x_shock = []
     # Detect the shockwave position using the provided algorithm
-    x_shock = shockwave_algorithm(frame, data)
+    try
+        x_shock = shockwave_algorithm(frame, data, threshold = threshold)
+    catch 
+        x_shock = shockwave_algorithm(frame, data)
+    end
     #x_shock = shockwave_algorithm(v_data)
 
     # density, momentum, and energy
@@ -127,12 +133,13 @@ Driver function to detect and plot shock wave points in 1D.
 
 Input arguments:
 - data: EulerSim object
-- filename: Filename of the .tape file of the simulation.
+Optional:
 - save_dir: Directory where the figures shall be stored.
 - shockwave_algorithm: The function that detects the shock points. E.g. findShock1D Shall take the arguments:
+- threshold: value passed on to shockwave_algorithm
     Shall return a list of indices where shockpoints are assumed.
 """
-function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false) where {T}
+function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false, threshold = 0.5) where {T}
 
     @info "Generating shock plots in 1D"
 
@@ -152,11 +159,9 @@ function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "fra
         @info "Created folder $save_dir"
     end
 
-    
-
     # Generate PNG files sequentially
     for i = 1:data.nsteps
-        p = plotframe1D(i, data, shockwave_algorithm)
+        p = plotframe1D(i, data, shockwave_algorithm; threshold = threshold)
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(i, 3, '0')).png")
         savefig(p, filename)
         if html
@@ -218,7 +223,7 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
 end
 
 #Plots heatmap of d1p. Mainly for debug purposes.
-function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+function plot_d1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, save_dir::AbstractString) where {T}
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     d1p = delta_1p(frame, data)
     #Plotting
@@ -239,7 +244,7 @@ function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where 
 end
 
 #Plots heatmap of d2p. Mainly for debug purposes.
-function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
+function plot_d2p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, save_dir::AbstractString) where {T}
     d2p = delta_2p(frame, data)
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     #Plotting
@@ -262,7 +267,7 @@ end
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
 """
-function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm; vectors = false) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
     shocklist = shockwave_algorithm(frame, data)
@@ -340,7 +345,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::EulerSim{2, 4, T}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) where {T}
     @info "Generating shock plots in 2D"
 
     # Generate the current date and time in the desired format
