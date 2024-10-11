@@ -13,6 +13,13 @@ using Images
 
 using StaticArrays
 
+#GLOBAL THRESHOLD DEFAULT VALUES
+#1D value for factor of maximum gradient
+global const eps_1d = 0.5
+#2D value for minimum d_1ρ cutoff
+global const eps1_euler = 0.15
+global const eps1_cell = 0.1
+
 include("shock1D.jl")
 include("shock2D.jl")
 

@@ -1,3 +1,6 @@
+
+
+
 """
 Returns plot boundaries of the simulation object sim for 1D case. (Used in plotframe)
 """
@@ -51,7 +54,7 @@ end
     - debug: All plots or only density + ∇ density plots, which show shockpoints sufficiently.
     - threshold: value passed onto shockwave_algorithm as argument
 """
-function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = false, debug = false, threshold = 0.5) where {T}
+function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = false, debug = false, threshold = eps_1d) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
 	ylabels=[L"ρ", L"ρv", L"ρE"]
@@ -139,7 +142,7 @@ Optional:
 - threshold: value passed on to shockwave_algorithm
     Shall return a list of indices where shockpoints are assumed.
 """
-function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false, threshold = 0.5) where {T}
+function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false, threshold = eps_1d) where {T}
 
     @info "Generating shock plots in 1D"
 
@@ -267,10 +270,10 @@ end
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
 """
-function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
-    shocklist = shockwave_algorithm(frame, data)
+    shocklist = shockwave_algorithm(frame, data; threshold=eps1_euler)
     plot_data = compute_data_function(frame, data)
 
     # Determine the header based on the data's units
@@ -345,7 +348,18 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true, threshold = 0.133) where {T}
+    #=
+    deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
+    if threshold == 0.133
+        if data isa EulerSim{2,4,T}
+            threshold = eps1_euler
+        elseif data isa CellBasedEulerSim{T}
+            threshold = eps1_cell
+        end
+    end"
+    =#
+
     @info "Generating shock plots in 2D"
 
     # Generate the current date and time in the desired format
@@ -363,8 +377,19 @@ function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T
         mkdir(save_dir)
     end
 
+    if threshold == 0.133
+        if data isa EulerSim{2,4,T}
+            threshold = eps1_euler
+        elseif data isa CellBasedEulerSim{T}
+            threshold = eps1_cell
+        end
+    end
+
+    @info "2d threshold value " threshold
+
     for step in 1:data.nsteps
-        final_plot_layout = plotframe2D(step,data,compute_density_data,findShock2D; vectors=vectors)
+
+        final_plot_layout = plotframe2D(step,data,compute_density_data,findShock2D; vectors=vectors, threshold = threshold)
 
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
 
