@@ -84,7 +84,7 @@ function delta_1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) whe
     l = cell_centers(data)[2][2] - cell_centers(data)[2][1]
 
     ρ = compute_density_data(frame, data)
-    ρ = ustrip(ρ)
+    ρ = ustrip.(ρ)
 
     dRho = gradient_2d(frame, data, compute_density_data)
     

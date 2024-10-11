@@ -154,3 +154,9 @@ function divide_matrices(matrix1::Matrix{T}, matrix2::Matrix{T}) where {T}
 
     return result
 end
+
+
+# overload ustrip function for nothing/unitful unions
+function ustrip(matrix::Matrix{Union{Nothing, Unitful.Quantity{T, D, U}}}) where {T, D, U}
+    return map(x -> x === nothing ? nothing : Unitful.ustrip(x), matrix)
+end
