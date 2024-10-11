@@ -20,7 +20,7 @@ Type support for EulerSim (2D <=> EulerSim{2, 4, T}) and CellBasedEulerSim.
 =#
 
 #Returns matrix with pressure data
-function compute_pressure_data(frame, data::EulerSim{2, 4, T}) where {T}
+function compute_pressure_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
     (t, u_data) = nth_step(data, frame)
     pressure_data = map(eachslice(u_data; dims=(2,3))) do u
         c = ConservedProps(u[1:end])
@@ -37,7 +37,7 @@ function compute_pressure_data(frame, data::CellBasedEulerSim)
 end
 
 #Returns matrix with velocity data
-function compute_velocity_data(frame, data::EulerSim{2, 4, T}) where {T}
+function compute_velocity_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
     (t, u_data) = nth_step(data, frame)
     velocity_data = map(eachslice(u_data; dims=(2,3))) do u
         c = ConservedProps(u[1:end])
@@ -68,11 +68,8 @@ function compute_density_data(frame, data::CellBasedEulerSim)
 end
 
 #Return matrix of normalized velocity vectors
-function normalized_velocity(frame, data) where {T}
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by normalized_velocity as arguments for data."
-        return []
-    end
+function normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+
     velocity_xy = compute_velocity_data(frame, data)
     for i in 1:size(velocity_xy, 1)  # Iterate over rows
         for j in 1:size(velocity_xy, 2)  # Iterate over columns
@@ -86,12 +83,12 @@ function normalized_velocity(frame, data) where {T}
     return velocity_xy
 end
 
-function compute_velocity_magnitude_data(frame, data) where {T}
+function compute_velocity_magnitude_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
     if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
         @error "Only EulerSim and CellBasedEulerSim are supported by compute_velocity_magnitude_data as arguments for data."
         return []
     end
-    v = compute_velocity_data
+    v = compute_velocity_data(frame, data)
     v_n = broadcast(norm, v)
     return v_n
 end
@@ -126,7 +123,7 @@ function divide_matrices_1(matrix1, matrix2)
     return result
 end
 
-function divide_matrices(matrix1, matrix2)
+function divide_matrices(matrix1::Matrix{T}, matrix2::Matrix{T}) where {T}
     if size(matrix1) != size(matrix2)
         throw(ArgumentError("Matrices must have the same dimensions"))
     end
