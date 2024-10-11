@@ -302,23 +302,21 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         blanked2 = blank(d1p, d2p, 0.2 * threshold, 10e-5) #blank with lower cutoff threshold.
         shocklist_2 = Tuple.(findall(blanked2 .== true))
 
+        s_new = []
         #Find points in shocklist_2 (with less strict criteria) who are close to existing shocks, and append them.
-        lenList = size(shocklist)[1]
-        @show size(shocklist)[1]
-        for points in 1:lenList
-            for point1 in shocklist_2
-                # Calculate distances between point1 and each point in shocklist
-                distances = [norm(point1 .- point2) for point2 in shocklist]
-                min_d = minimum(distances)
-                
-                if min_d < 1.5
-                    push!(shocklist, point1)
-                    # Construct shockwaves below.
+        for p1 in shocklist
+            p1x, p1y = p1
+            potentials = []
+            for x in (p1x-1):(p1x+1)
+                for y in (p1y-1):(p1y+1)
+                    if blanked2[x, y] == true
+                        push!(s_new, (x, y))
+                    end
                 end
             end
-            if points % 5 == 0
-                println("Progress (Abs./%): $(points); $(100 * points/(lenList)) %")
-            end
+        end
+        for p_new in s_new
+            push!(s_new, p_new)
         end
     end
     #Construct shockwaves below.
