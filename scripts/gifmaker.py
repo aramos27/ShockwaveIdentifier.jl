@@ -29,12 +29,15 @@ def pngs_to_gif(input_folder, output_gif=None, duration=100, loop=0):
     images = [Image.open(os.path.join(input_folder, f)) for f in png_files]
     print(f"{len(images)} PNGs loaded")
 
+    n = len(png_files)
+    optimalDuration = 50 * (2 - (np.exp(0.02 * n * (150) - 1) / np.exp(0.02 * n * (150) + 1)))
+
     # Save images as a GIF
     images[0].save(
         output_gif,
         save_all=True,
         append_images=images[1:],
-        duration=duration,  # Duration in milliseconds per frame
+        duration=optimalDuration,  # Duration in milliseconds per frame
         loop=loop  # 0 means infinite loop
     )
 
