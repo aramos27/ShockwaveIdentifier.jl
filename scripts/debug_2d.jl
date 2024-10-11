@@ -37,7 +37,7 @@ end
 
 for step in 1:data.nsteps
 
-    final_plot_layout = plotframe2D(step,data,ShockwaveIdentifier.compute_density_data,ShockwaveIdentifier.findShock2D; vectors=false, threshold = ShockwaveIdentifier.eps1_cell)
+    final_plot_layout = plotframe2D(step,data,ShockwaveIdentifier.compute_density_data,ShockwaveIdentifier.findShock2D; vectors=false, threshold = ShockwaveIdentifier.eps1_cell, level = 1)
 
     d1p_plot = ShockwaveIdentifier.plot_d1p(step, data, save_dir)
 
