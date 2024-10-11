@@ -20,24 +20,27 @@ Type support for EulerSim (2D <=> EulerSim{2, 4, T}) and CellBasedEulerSim.
 =#
 
 #Returns matrix with pressure data
-function compute_pressure_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+function compute_pressure_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
     pressure_data = map(eachslice(u_data; dims=(2,3))) do u
         c = ConservedProps(u[1:end])
         return uconvert(u"Pa", pressure(c, DRY_AIR))
         
     end
-
     return pressure_data
 end
 
 
 function compute_pressure_data(frame, data::CellBasedEulerSim)
-    return pressure_field(data, frame, DRY_AIR)
+    p = pressure_field(data, frame, DRY_AIR)
+    f = map(p) do val
+		isnothing(val) ? 0. : ustrip(val)
+    end
+    return f
 end
 
 #Returns matrix with velocity data
-function compute_velocity_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+function compute_velocity_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
     velocity_data = map(eachslice(u_data; dims=(2,3))) do u
         c = ConservedProps(u[1:end])
@@ -48,11 +51,15 @@ end
 
 
 function compute_velocity_data(frame, data::CellBasedEulerSim)
-    return velocity_field(data, frame)
+    v = velocity_field(data, frame)
+    f = map(v) do val
+		isnothing(val) ? 0. : ustrip(val)
+    end
+    return f
 end
 
 #Returns matrix with density data
-function compute_density_data(frame, data::EulerSim{2,4, T}) where {T}
+function compute_density_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
     # Compute density data from the conserved properties
     density_data = map(eachslice(u_data; dims=(2,3))) do u
@@ -64,11 +71,19 @@ function compute_density_data(frame, data::EulerSim{2,4, T}) where {T}
 end
 
 function compute_density_data(frame, data::CellBasedEulerSim)
-    return density_field(data,frame)
+    rho = density_field(data,frame)
+    f = map(rho) do val
+		isnothing(val) ? 0. : ustrip(val)
+    end
+    return f
 end
 
 #Return matrix of normalized velocity vectors
 function normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+    v = compute_velocity_data(frame, data)
+    v = ustrip(v)
+    v_n = broadcast(norm, v)
+    return v_n
 
     velocity_xy = compute_velocity_data(frame, data)
     for i in 1:size(velocity_xy, 1)  # Iterate over rows
@@ -80,14 +95,11 @@ function normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerS
             end
         end
     end
-    return velocity_xy
+
+    #return velocity_xy
 end
 
 function compute_velocity_magnitude_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by compute_velocity_magnitude_data as arguments for data."
-        return []
-    end
     v = compute_velocity_data(frame, data)
     v_n = broadcast(norm, v)
     return v_n
@@ -123,7 +135,7 @@ function divide_matrices_1(matrix1, matrix2)
     return result
 end
 
-function divide_matrices(matrix1::Matrix{T}, matrix2::Matrix{T}) where {T}
+function divide_matrices(matrix1, matrix2) 
     if size(matrix1) != size(matrix2)
         throw(ArgumentError("Matrices must have the same dimensions"))
     end
@@ -140,27 +152,29 @@ function divide_matrices(matrix1::Matrix{T}, matrix2::Matrix{T}) where {T}
 
             # Check for division by zero if necessary (depending on your application)
             if q2 == 0
-                throw(DomainError("Division by zero at position ($i, $j)"))
+                @info "Division by zero at position ($i, $j)"
+                result[i, j] = SVector(x1, y1) # try to catcg this error when dividing through zero, hoping that the matrix1 value is also zero.
+            else
+                # Normalize the SVector by dividing its components by the quantity
+                x2 = x1 / Float64(q2)  # Convert Unitful quantity to Float64
+                y2 = y1 / Float64(q2)
+
+                # Store the result as an SVector in the new matrix
+                result[i, j] = SVector(x2, y2)
             end
-
-            # Normalize the SVector by dividing its components by the quantity
-            x2 = x1 / Float64(q2)  # Convert Unitful quantity to Float64
-            y2 = y1 / Float64(q2)
-
-            # Store the result as an SVector in the new matrix
-            result[i, j] = SVector(x2, y2)
         end
     end
 
     return result
 end
 
-
+#=
 # overload ustrip function for nothing/unitful unions
 function ustrip(matrix::Matrix{Union{Nothing, Unitful.Quantity{T, D, U}}}) where {T, D, U}
-    return map(x -> x === nothing ? 0. : Unitful.ustrip(x), matrix)
+    return Matrix{T}(map(x -> x === nothing ? 0. : Unitful.ustrip(x), matrix))
 end
 
 function ustrip(value::Union{Nothing, Unitful.Quantity{T, D, U}}) where {T, D, U}
     return  value === nothing ? 0. : Unitful.ustrip(value)
 end
+=#
