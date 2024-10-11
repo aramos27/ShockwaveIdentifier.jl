@@ -278,11 +278,18 @@ end
 
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
+
+- frame, data: as usual.
+- vectors, threshold: passed on through shockwave_algorithm.
+- compute_data_function: over which data (e.g. density) the shock detection results shall be plotted.
+- level: level of detection. 
+    - 1: Coarse: usual
+    - 2: improved: double (see findShock2D)
 """
-function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler, level=2) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
-    shocklist = shockwave_algorithm(frame, data; threshold=eps1_euler)
+    shocklist = shockwave_algorithm(frame, data; threshold=eps1_euler, level= level)
     plot_data = compute_data_function(frame, data)
 
     # Determine the header based on the data's units
