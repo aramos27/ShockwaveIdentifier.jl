@@ -43,7 +43,7 @@ for step in 1:data.nsteps
 
     filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
 
-    #savefig(final_plot_layout, "$(filename).png")
+    savefig(final_plot_layout, "$(filename).png")
     if html
         savefig(final_plot_layout, "$(filename)_zoomable.html")
     end
