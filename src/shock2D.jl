@@ -97,8 +97,6 @@ function delta_1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) whe
     #sdRho = dRho_normalized
     sdRho = ustrip.(sdRho)
     
-    show(typeof(v))
-    show(typeof(sdRho))
     #piecewise dot-product of v and \delta Rho
     d1p = map(dot, v, sdRho)
     #factor l, approx. the computational domain size (linearly)
