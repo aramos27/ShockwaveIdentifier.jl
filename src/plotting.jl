@@ -190,12 +190,7 @@ function plot_1d_heatmap(magnitude, filename::String)
 end
 
 #Plots for 2d grid with compute_data_function at data[frame] for a quantity, e.g. pressure.
-function plotframe2D(frame, data, compute_data_function) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
-        return []
-    end
-
+function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
     plot_data = compute_data_function(frame, data)
@@ -228,11 +223,7 @@ function plotframe2D(frame, data, compute_data_function)
 end
 
 #Plots heatmap of d1p. Mainly for debug purposes.
-function plot_d1p(frame, data, save_dir::AbstractString) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
-        return []
-    end
+function plot_d1p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     d1p = delta_1p(frame, data)
     #Plotting
@@ -253,11 +244,7 @@ function plot_d1p(frame, data, save_dir::AbstractString)
 end
 
 #Plots heatmap of d2p. Mainly for debug purposes.
-function plot_d2p(frame, data, save_dir::AbstractString) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
-        return []
-    end
+function plot_d2p(frame, data::EulerSim{2,4,T}, save_dir::AbstractString) where {T}
     d2p = delta_2p(frame, data)
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
     #Plotting
@@ -280,12 +267,7 @@ end
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
 """
-function plotframe2D(frame, data, compute_data_function, shockwave_algorithm; vectors = false) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
-        return []
-    end
-
+function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function, shockwave_algorithm; vectors = false) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
     shocklist = shockwave_algorithm(frame, data)
@@ -363,11 +345,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
-        return []
-    end
+function generate_shock_plots2D(data::EulerSim{2, 4, T}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) where {T}
     @info "Generating shock plots in 2D"
 
     # Generate the current date and time in the desired format
