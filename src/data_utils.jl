@@ -1,3 +1,4 @@
+using ShockwaveProperties
 #Extract information from .tape and save as EulerSim. For .celltape files, use load_cell_data directly.
 function load_sim_data(filename; T=Float64)
 	return Euler2D.load_euler_sim((filename); T)
@@ -14,6 +15,10 @@ function load_data(filename; T=Float64)
 end
 
 
+#=
+Type support for EulerSim (2D <=> EulerSim{2, 4, T}) and CellBasedEulerSim.
+=#
+
 #Returns matrix with pressure data
 function compute_pressure_data(frame, data::EulerSim{2, 4, T}) where {T}
     (t, u_data) = nth_step(data, frame)
@@ -27,6 +32,10 @@ function compute_pressure_data(frame, data::EulerSim{2, 4, T}) where {T}
 end
 
 
+function compute_pressure_data(frame, data::CellBasedEulerSim)
+    return pressure_field(data, frame, DRY_AIR)
+end
+
 #Returns matrix with velocity data
 function compute_velocity_data(frame, data::EulerSim{2, 4, T}) where {T}
     (t, u_data) = nth_step(data, frame)
@@ -34,8 +43,12 @@ function compute_velocity_data(frame, data::EulerSim{2, 4, T}) where {T}
         c = ConservedProps(u[1:end])
         return velocity(c, DRY_AIR)
     end
-
     return velocity_data
+end
+
+
+function compute_velocity_data(frame, data::CellBasedEulerSim)
+    return velocity_field(data, frame)
 end
 
 #Returns matrix with density data
@@ -50,9 +63,16 @@ function compute_density_data(frame, data::EulerSim{2,4, T}) where {T}
     return density_data
 end
 
+function compute_density_data(frame, data::CellBasedEulerSim)
+    return density_field(data,frame)
+end
 
 #Return matrix of normalized velocity vectors
-function normalized_velocity(frame, data::EulerSim{2, 4, T}) where {T}
+function normalized_velocity(frame, data) where {T}
+    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
+        @error "Only EulerSim and CellBasedEulerSim are supported by normalized_velocity as arguments for data."
+        return []
+    end
     velocity_xy = compute_velocity_data(frame, data)
     for i in 1:size(velocity_xy, 1)  # Iterate over rows
         for j in 1:size(velocity_xy, 2)  # Iterate over columns
@@ -66,16 +86,14 @@ function normalized_velocity(frame, data::EulerSim{2, 4, T}) where {T}
     return velocity_xy
 end
 
-function compute_velocity_magnitude_data(frame, data::EulerSim{2,4,T}) where {T}
-    (t, u_data) = nth_step(data, frame)
-    velocity_data_magnitude = map(eachslice(u_data; dims=(2,3))) do u
-        c = ConservedProps(u[1:end])
-        velocity_in_ms = velocity(c, DRY_AIR)
-        velocity_x = uconvert(u"m/s", velocity_in_ms[1])
-        velocity_y = uconvert(u"m/s", velocity_in_ms[2])
-        return sqrt(velocity_x^2 + velocity_y^2)
+function compute_velocity_magnitude_data(frame, data) where {T}
+    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
+        @error "Only EulerSim and CellBasedEulerSim are supported by compute_velocity_magnitude_data as arguments for data."
+        return []
     end
-    return velocity_data_magnitude
+    v = compute_velocity_data
+    v_n = broadcast(norm, v)
+    return v_n
 end
 
 
