@@ -316,8 +316,17 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
 
     # Overlay shock points on both plots
     scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=0.25, marker=:cross)
-
-    
+    #=Shockline
+    contour = true
+    if contour
+        @info "Plot shockwave"
+        float_matrix = zeros(Float64, data.ncells)
+        for (i, j) in shocklist
+            float_matrix[i, j] = 1.0
+        end
+        contour!(xs, ys, float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
+    end
+    =#
     if vectors
         @info "Plot normal vectors"
         """
@@ -357,7 +366,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true, threshold = 0.133) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = false, threshold = 0.133) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
