@@ -43,3 +43,16 @@ end
 
     rm(temp_dir)
 end
+
+@testset "Celltape 2D Test" begin
+    tapes = [
+    "../dataSim/funky_triangle.tape"
+    ]
+
+    for tape in tapes
+        println("Processing $tape")
+        generate_shock_plots2D(load_data(tape), save_dir = temp_dir)
+    end
+
+    rm(temp_dir)
+end
