@@ -191,8 +191,8 @@ end
 
 #Plots for 2d grid with compute_data_function at data[frame] for a quantity, e.g. pressure.
 function plotframe2D(frame, data, compute_data_function) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
 
@@ -229,8 +229,8 @@ end
 
 #Plots heatmap of d1p. Mainly for debug purposes.
 function plot_d1p(frame, data, save_dir::AbstractString) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
     datestr = Dates.format(now(), "mm-dd-HH-MM-SS")
@@ -254,8 +254,8 @@ end
 
 #Plots heatmap of d2p. Mainly for debug purposes.
 function plot_d2p(frame, data, save_dir::AbstractString) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
     d2p = delta_2p(frame, data)
@@ -281,8 +281,8 @@ end
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
 """
 function plotframe2D(frame, data, compute_data_function, shockwave_algorithm; vectors = false) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
 
@@ -364,8 +364,8 @@ end
 Analogue to 1D function
 """
 function generate_shock_plots2D(data; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = true) 
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by this function as arguments for data."
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
     @info "Generating shock plots in 2D"

@@ -68,9 +68,9 @@ function compute_density_data(frame, data::CellBasedEulerSim)
 end
 
 #Return matrix of normalized velocity vectors
-function normalized_velocity(frame, data) where {T}
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by normalized_velocity as arguments for data."
+function normalized_velocity(frame, data) 
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
     velocity_xy = compute_velocity_data(frame, data)
@@ -86,12 +86,12 @@ function normalized_velocity(frame, data) where {T}
     return velocity_xy
 end
 
-function compute_velocity_magnitude_data(frame, data) where {T}
-    if typeof(data) != EulerSim{2, 4, T} || typeof(data) != CellBasedEulerSim
-        @error "Only EulerSim and CellBasedEulerSim are supported by compute_velocity_magnitude_data as arguments for data."
+function compute_velocity_magnitude_data(frame, data) 
+    if !(data isa EulerSim{2, 4, T} where T) && !(data isa CellBasedEulerSim)
+        @error "Only EulerSim{2, 4, T} and CellBasedEulerSim are supported by this function."
         return []
     end
-    v = compute_velocity_data
+    v = compute_velocity_data(frame,data)
     v_n = broadcast(norm, v)
     return v_n
 end
