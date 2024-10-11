@@ -287,19 +287,34 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
     "Blank" the matrix. E.q. we look where d1p is bigger than 0.15 (ϵ_1) and where d2p is smaller than 0.00001 (ϵ_2).
     These points are marked with a zero.
     =#
-    blanked = blank(d1p, d2p, eps1_euler, 10e-5)
+    blanked = blank(d1p, d2p, threshold, 10e-5)
 
     #The coordinates where we detect a shock condition are put into the array shocklist.
-    shocklist = []
-    for i in 1:size(blanked, 1)
-        for j in 1:size(blanked, 2)
-            if blanked[i, j] == true
-                push!(shocklist, (i, j))
+    shocklist = Tuple.(findall(blanked .== true))
+
+    # Part II: Find neighbors of cells in shocklist with high gradients, but not as high.
+    blanked2 = blank(d1p, d2p, 0.2 * threshold, 10e-5) #blank with lower cutoff threshold.
+    shocklist_2 = Tuple.(findall(blanked2 .== true))
+
+    #Find points in shocklist_2 (with less strict criteria) who are close to existing shocks, and append them.
+    lenList = size(shocklist)[1]
+    @show size(shocklist)[1]
+    for points in 1:lenList
+        for point1 in shocklist_2
+            # Calculate distances between point1 and each point in shocklist
+            distances = [norm(point1 .- point2) for point2 in shocklist]
+            min_d = minimum(distances)
+            
+            if min_d < 1.5
+                push!(shocklist, point1)
+                # Construct shockwaves below.
             end
+        end
+        if points % 5 == 0
+            println("Progress (Abs./%): $(points); $(100 * points/(lenList)) %")
         end
     end
     #Construct shockwaves below.
-
     return shocklist
 end 
 
