@@ -49,15 +49,21 @@ end
     - shockwave_algorithm: function to determine shocks and takes frame, data as input arguments.
     - save: Flag whether the figures shall be stored directly.
     - debug: All plots or only density + ∇ density plots, which show shockpoints sufficiently.
+    - threshold: value passed onto shockwave_algorithm as argument
 """
-function plotframe1D(frame, data::EulerSim{1, 3, T}, shockwave_algorithm, save = false, debug = false) where {T}
+function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = false, debug = false, threshold = 0.5) where {T}
 	(t, u_data) = nth_step(data, frame)
 	xs = cell_centers(data, 1)
 	ylabels=[L"ρ", L"ρv", L"ρE"]
     ps = []
     bounds = plot_bounds(data)
+    x_shock = []
     # Detect the shockwave position using the provided algorithm
-    x_shock = shockwave_algorithm(frame, data)
+    try
+        x_shock = shockwave_algorithm(frame, data, threshold = threshold)
+    catch 
+        x_shock = shockwave_algorithm(frame, data)
+    end
     #x_shock = shockwave_algorithm(v_data)
 
     # density, momentum, and energy
@@ -127,12 +133,13 @@ Driver function to detect and plot shock wave points in 1D.
 
 Input arguments:
 - data: EulerSim object
-- filename: Filename of the .tape file of the simulation.
+Optional:
 - save_dir: Directory where the figures shall be stored.
 - shockwave_algorithm: The function that detects the shock points. E.g. findShock1D Shall take the arguments:
+- threshold: value passed on to shockwave_algorithm
     Shall return a list of indices where shockpoints are assumed.
 """
-function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false) where {T}
+function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "frames", shockwave_algorithm = findShock1D, html = false, threshold = 0.5) where {T}
 
     @info "Generating shock plots in 1D"
 
@@ -152,11 +159,9 @@ function generate_shock_plots1D(data::EulerSim{1, 3, T}; save_dir::String = "fra
         @info "Created folder $save_dir"
     end
 
-    
-
     # Generate PNG files sequentially
     for i = 1:data.nsteps
-        p = plotframe1D(i, data, shockwave_algorithm)
+        p = plotframe1D(i, data, shockwave_algorithm; threshold = threshold)
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(i, 3, '0')).png")
         savefig(p, filename)
         if html
