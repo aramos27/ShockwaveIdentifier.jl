@@ -1,5 +1,13 @@
 
+#GLOBAL VARIABLES UNUSED FOR NOW.
+YBOUNDS_1D = [
+    0.1, 0.1, 0.1, 0.1
+]
+#y axis boundary for 1d plots
 
+BOUNDS_2D = [
+    0., 0., 1., 1.
+]
 
 """
 Returns plot boundaries of the simulation object sim for 1D case. (Used in plotframe)
@@ -12,6 +20,7 @@ function plot_bounds(sim::EulerSim{N,NAXES,T}) where {N,NAXES,T}
 		return (mid-1.1*diffhalf, mid+1.1*diffhalf)
 	end
 end
+
 
 
 """ 
