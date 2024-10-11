@@ -36,7 +36,7 @@ Calls gradient_2d(data_no_units, hx, hy) after formatting data accordingly.
 function gradient_2d(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function) where {T}
 
     # Check if the data is an EulerSim or a regular Float64 array
-    if typeof(data) <: EulerSim
+    if typeof(data) <: Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}
         # If it's an EulerSim, extract the density data at the specified frame
         if frame === nothing
             error("Frame number must be provided when using EulerSim data")
