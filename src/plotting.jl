@@ -286,10 +286,10 @@ plotframe2D function to plot 2d frames including shock points and possibly norma
     - 1: Coarse: usual
     - 2: improved: double (see findShock2D)
 """
-function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler, level=2) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler, level=1) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
-    shocklist = shockwave_algorithm(frame, data; threshold=eps1_euler, level= level)
+    shocklist = shockwave_algorithm(frame, data; threshold=eps1_euler, level=level)
     plot_data = compute_data_function(frame, data)
 
     # Determine the header based on the data's units
@@ -373,7 +373,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = false, threshold = 0.133) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
@@ -414,7 +414,7 @@ function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T
 
     for step in 1:data.nsteps
 
-        final_plot_layout = plotframe2D(step,data,compute_density_data,findShock2D; vectors=vectors, threshold = threshold)
+        final_plot_layout = plotframe2D(step,data,compute_density_data,findShock2D; vectors=vectors, threshold = threshold, level = level)
 
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
 
