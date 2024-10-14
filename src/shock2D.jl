@@ -368,7 +368,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         # Find and append neighboring points with less strict gradient conditions
         update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)
 
-        println("Amount of shock points: ", size(shocklist)[1])
+        println("Final amount of shock points: ", size(shocklist))
 
 
     #Watchout! Slow, inefficient, insecure
@@ -380,7 +380,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
 
         #Find points in shocklist_2 (with less strict criteria) who are close to existing shocks, and append them.
         lenList = size(shocklist)[1]
-        @show size(shocklist)[1]
+        #@show size(shocklist)[1]
         for points in 1:lenList
             for point1 in shocklist_relaxed
                 # Calculate distances between point1 and each point in shocklist
