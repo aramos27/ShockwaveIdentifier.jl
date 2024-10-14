@@ -20,7 +20,7 @@ end
 
 @testset "Supersonic 1D Test" begin
     tapes = [
-    "../dataSim/supersonic_shock_1.tape"
+    "../dataSim/supersonic_shock_3.tape"
     ]
 
     for tape in tapes
