@@ -94,7 +94,8 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 	
 	#Density data is u_data[]
 	grad_max = maxGradient(u_data[1, :])
-	grad_avg = averageGradient(u_data[1, :])
+
+	@info "Density grad max" grad_max "Threshold " threshold*grad_max
 
 	unit = u"1"
 	try
@@ -111,27 +112,44 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 	v_data = ustrip.(v_data)
 	v_norm = normalize(v_data)
 
+	dv = diff(v_data)
+	push!(dv,0)
+
+	#check density data according to 2D approach.
+	density_data = u_data[1, :]
+	d1p = diff(density_data) .* ustrip.(v_data)[1:(end-1)]
+	push!(d1p,0) #compensate for diff losing one element of the array
+
 	if grad_max != 0unit 
 		#check velocity data
 		grad_max_v = maxGradient(v_data)		
 		threshold_v = threshold * (grad_max_v)
-		shock_points_v = findall(x->abs(x) > threshold_v, v_data)
+		shock_points_v = findall(x->abs(x) > threshold_v, dv)
 
-
-		#check density data according to 2D approach.
-		density_data = u_data[1, :]
-		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end-1)])
-		push!(d1p,0) #compensate for diff losing one element of the array
+		shock_points_v_relaxed = findall(x->abs(x) > threshold_v * 0.8, dv)
 		
-		grad_max_dp = maximum(d1p)
-		threshold = threshold * (grad_max_dp)
-		shock_points_d1p = findall(x->abs(x) > threshold, d1p)
+		grad_max_dp = maximum(abs.(d1p))
+		@info "Grad max dp1" grad_max_dp   threshold*grad_max_dp
+
+		threshold_dp = threshold * (grad_max_dp)
+		shock_points_d1p = findall(x->abs(x) > threshold_dp, d1p)
+		shock_points_d1p_relaxed = findall(x->abs(x) > threshold_dp * 0.8, d1p)
+
 		shock_points = []
+
+
+
 		for sp_v in shock_points_v
-			if sp_v in shock_points_d1p
+			if sp_v in shock_points_d1p_relaxed
 				push!(shock_points, sp_v)
 			end
 		end
+		for sp_d1p in shock_points_d1p
+			if sp_d1p in shock_points_v_relaxed && !(sp_d1p in shock_points)
+				push!(shock_points, sp_d1p)
+			end
+		end
+
 
 		return shock_points #Shockpoint candidates
 	else

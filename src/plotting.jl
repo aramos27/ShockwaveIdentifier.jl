@@ -1,4 +1,3 @@
-
 #GLOBAL VARIABLES UNUSED FOR NOW.
 YBOUNDS_1D = [
     0.1, 0.1, 0.1, 0.1
@@ -114,25 +113,38 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     # Gradient Density
     density_gradient = diff(u_data[1, :])
     density_gradient_plot = plot(gradient_xs, density_gradient, ylabel=L"\nabla ρ",  legend=false)
+   
+    # Gradient velocity
+    velocity_gradient = diff(v_data)
+    velocity_gradient_plot = plot(gradient_xs, velocity_gradient, ylabel=L"\nabla v",  legend=false)
 
     # d1p: density * velocity_norm
-    d1p = density_gradient .* normalize(ustrip.(v_data)[1:(end-1)])
+    d1p = density_gradient .* ustrip.(v_data)[1:(end-1)]
     
     d1p_plot = plot(gradient_xs, d1p, ylabel=L"δ_1_ρ", legend=false)
 
+
+    mach_data = transpose(mach_number_field(data, frame, DRY_AIR))
+    mach_plot = plot(xs, mach_data, ylabel=L"Mach", legend=false)
+
     # Plotting
     scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
-    scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
-    scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
-   
+    scatter!(d1p_plot, [gradient_xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
+    scatter!(density_gradient_plot, [gradient_xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
+    scatter!(pressure_gradient_plot, [gradient_xs[x_shock]], [pressure_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
+    scatter!(velocity_gradient_plot, [gradient_xs[x_shock]], [velocity_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")        
+    scatter!(mach_plot, [xs[x_shock]], [mach_data[x_shock]], markersize=1,label="Shockwave", color="orange")        
+
+
+
     titlestr = @sprintf "n=%d t=%.4e" frame t
 
     """Plot the plots to a fig object. If debug, plot all. if no debug, only plot density + gradient. """
     if debug
-        fig =  plot(ps[1], density_gradient_plot, d1p_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, 
+        fig =  plot(ps[1], density_gradient_plot, d1p_plot, ps[2], pressure_plot, pressure_gradient_plot, velocity_plot, velocity_gradient_plot, mach_plot,
             suptitle=titlestr, titlefontface="Computer Modern")
     else
-        fig = plot(ps[1], density_gradient_plot, d1p_plot, velocity_plot, suptitle=titlestr, titlefontface="Computer Modern")
+        fig = plot(ps[1], density_gradient_plot, d1p_plot, velocity_plot, velocity_gradient_plot, suptitle=titlestr, titlefontface="Computer Modern")
     end
     if save == true
         savefig(fig, "plot1d_shock_$(frame)")
