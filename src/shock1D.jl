@@ -120,7 +120,6 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 
 #mach number
 	mach_data = vec(mach_number_field(data, frame, DRY_AIR))
-	@show typeof(mach_data)
 	dmach = diff(mach_data)
 	push!(dmach, 0)
 
@@ -131,20 +130,13 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 		threshold_v = threshold * (grad_max_v)
 		shock_points_v = findall(x->abs(x) > threshold_v, dv)
 
-		shock_points_v_relaxed = findall(x->abs(x) > threshold_v * 0.8, dv)
-		
-		grad_max_dp = maximum(abs.(d1p))
-		#@info "Grad max dp1" grad_max_dp   threshold*grad_max_dp		
-
-		threshold_dp = threshold * (grad_max_dp)
-		shock_points_d1p = findall(x->abs(x) > threshold_dp, d1p)
-		shock_points_d1p_relaxed = findall(x->abs(x) > threshold_dp * 0.8, d1p)
+		shock_points_v_relaxed = findall(x->abs(x) > threshold_v * 0.94, dv)
 
 		grad_max_mach = maximum(abs.(dmach))
 
 		threshold_mach = threshold * (grad_max_mach)
 		shock_points_mach = findall(x->abs(x) > threshold_mach, dmach)
-		shock_points_mach_relaxed = findall(x->abs(x) > threshold_mach * 0.8, dmach)
+		shock_points_mach_relaxed = findall(x->abs(x) > threshold_mach * 0.94, dmach)
 
 		shock_points = []
 
@@ -166,11 +158,9 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 		density_data = u_data[1, :]
 
 		#analogue aproach to 2D: We compare the gradient of density multiplied by normalized velocity
-		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end-1)])
-		push!(d1p,0)
+		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end)])
 
 		grad_max = maximum(d1p)
-		#@info "Max d1p: " maximum(d1p)
 
 		threshold = 0.5 * (grad_max) #find some formula for the threshold. like this, it seems to work.
 

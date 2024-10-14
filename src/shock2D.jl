@@ -271,7 +271,6 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = eps1_cell, eps2::T = 10
         end
     end
 
-    println("Number of shockwaves detected: $shock_counter")
     return blanked
 end
 
@@ -369,7 +368,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         # Find and append neighboring points with less strict gradient conditions
         update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)
 
-        println("Final amount of shock points: ", size(shocklist))
+        println("Amount of shock points: ", size(shocklist)[1])
 
 
     #Watchout! Slow, inefficient, insecure
