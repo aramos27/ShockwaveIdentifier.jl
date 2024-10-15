@@ -406,7 +406,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = delta_1p, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = compute_density_data, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
