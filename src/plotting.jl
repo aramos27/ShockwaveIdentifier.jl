@@ -327,6 +327,11 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
         header = "Unknown Data"
     end
 
+    header = header * " and shock points at frame $frame"
+    if vectors
+        header = header * " with normal shock directions"
+    end
+
     #rotate matrix for correct plots
     plot_data_no_units = [x === nothing ? 0.0 : ustrip(x) for x in plot_data]   
     rows, cols = size(plot_data_no_units)
@@ -348,7 +353,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
     shock_ys = [ys[j] for (i, j) in shocklist]
 
     # Overlay shock points on both plots
-    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=0.25, marker=:cross)
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=1, marker=:cross)
     #=Shockline
     contour = true
     if contour
