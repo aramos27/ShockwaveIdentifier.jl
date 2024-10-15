@@ -83,7 +83,8 @@ function delta_1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) whe
 
     #because the other option (x*y) turns out to be quite large, we will try the grid size instead.
     #state of 10.09.2024: It seems to work.
-    l = cell_centers(data)[2][2] - cell_centers(data)[2][1]
+    
+    l = 0.5 * (cell_centers(data)[1][2] - cell_centers(data)[1][1] + cell_centers(data)[2][2] - cell_centers(data)[2][1]) / 2
 
     ρ = compute_density_data(frame, data)
     ρ = ustrip.(ρ)
