@@ -14,10 +14,14 @@ function load_data(filename; T=Float64)
 end
 
 
+function testscalar(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+    pressure_field = Euler2D.pressure_field(data, frame, DRY_AIR)
+    return pressure_field
+end
+
 #=
 Type support for EulerSim (2D <=> EulerSim{2, 4, T}) and CellBasedEulerSim.
 =#
-
 #Returns matrix with pressure data
 function compute_pressure_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)

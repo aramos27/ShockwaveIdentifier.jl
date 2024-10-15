@@ -2,7 +2,7 @@ using ShockwaveIdentifier
 
 tapes = [
     "../dataSim/funky_triangle.celltape"
-    "../dataSim/circular_obstacle_radius_1.celltape"
+    #"../dataSim/circular_obstacle_radius_1.celltape"
     ]
 
 for tape in tapes

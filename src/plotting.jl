@@ -213,7 +213,7 @@ function plot_1d_heatmap(magnitude, filename::String)
     xlabel="X-axis", 
     ylabel="Y-axis", 
     color=:viridis,
-    aspect_ratio=1  # square plot
+    aspect_ratio=1 , size= (1000,1000) # square plot
 )
     if filename == ""
         filename = "heatmap.png"
@@ -296,6 +296,35 @@ function plot_d2p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, sav
     savefig(delta_2rho_plot, filename)
 
 end
+
+function plotframe2D_test(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, shockwave_algorithm) where {T}
+    xs, ys = cell_centers(data)
+    println(xs)
+    println(ys)
+    shocklist = shockwave_algorithm(frame, data)
+    plot_data = testscalar(frame, data)
+    plot_data_no_units = [x === nothing ? 0.0 : ustrip(x) for x in plot_data] 
+    
+    rows, cols = size(plot_data_no_units)
+    rotated = Matrix{Float64}(undef, cols, rows) 
+
+    for i in 1:rows  # Iterate over the original rows
+        for j in 1:cols  # Iterate over the original columns
+            rotated[cols - j + 1, i] = plot_data_no_units[i, j]  # Rotate 90 degrees counterclockwise
+        end
+    end
+
+    header = "test"
+    heatmap_plot = heatmap(xs, ys, rotated,aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    shock_xs = [xs[i] for (i, j) in shocklist]
+    shock_ys = [ys[j] for (i, j) in shocklist]
+
+    # Overlay shock points on both plots
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=0.25, marker=:cross)
+    final_plot_layout = plot(heatmap_plot)
+    return final_plot_layout
+end
+
 
 """
 plotframe2D function to plot 2d frames including shock points and possibly normal vectors of the shock.
