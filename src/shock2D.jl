@@ -398,6 +398,14 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
             end
         end
     end
+
+    #delete unnecessary shockpoints (false positives)
+    #standalone shock points: unlikely to happen
+
+    #next to borders. no shocks at obstacles.
+
+
+
     #Construct shockwaves below.
     return shocklist
 end
