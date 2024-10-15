@@ -327,9 +327,20 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
         header = "Unknown Data"
     end
 
+    #rotate matrix for correct plots
+    plot_data_no_units = [x === nothing ? 0.0 : ustrip(x) for x in plot_data]   
+    rows, cols = size(plot_data_no_units)
+    rotated = Matrix{Float64}(undef, cols, rows) 
+
+    for i in 1:rows 
+        for j in 1:cols  
+            rotated[cols - j + 1, i] = plot_data_no_units[i, j]  
+        end
+    end
+
     # Plotting heatmaps
     #Plotting
-    heatmap_plot = heatmap(plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    heatmap_plot = heatmap(xs, ys, rotated, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
     
 
     # Extract shock point coordinates
@@ -349,6 +360,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
         contour!(xs, ys, float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
     end
     =#
+    
     if vectors
         @info "Plot normal vectors"
         """
