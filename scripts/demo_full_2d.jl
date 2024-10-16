@@ -1,16 +1,16 @@
 using ShockwaveIdentifier
-using Base.Threads
-
-# Example usage for 1D
-example_tapes = [
-    "../dataSim/sod_shock_right_2d.tape"
-    "../dataSim/circular_obstacle_radius_1.celltape"
-    "../dataSim/funky_square.celltape"
-    "../dataSim/funky_triangle.celltape"
-    "../dataSim/sod_shock_orb.tape"
+# Filename, level and detection threshold. obstacle files shall be tested with level 2.
+# Thresholds exist as preset values,
+# but may need to be tested for each tape file, for which a δ_1_ρ heatmap can be useful.
+tape_data = [
+    "../dataSim/circular_obstacle_radius_1.celltape" 2 0.2;
+    "../dataSim/funky_square.celltape" 2 0.2;
+    "../dataSim/funky_triangle.celltape" 2 0.2; 
+    "../dataSim/sod_shock_right_2d.tape" 1 1.25;
+    "../dataSim/sod_shock_orb.tape" 1 0.11;
 ]
 
-for tape in example_tapes
-    println("Processing $tape on thread $(threadid())")
-    generate_shock_plots2D(load_data(tape))
+for tape in tape_data
+    println("Processing $tape")
+    generate_shock_plots2D(load_data(tape[1]), vectors=true, level=tape[2], threshold=tape[3])
 end
