@@ -1,17 +1,18 @@
 module ShockwaveIdentifier
 
 using Euler2D
-using LaTeXStrings
-using LinearAlgebra
-using Plots
-using Printf
 using ShockwaveProperties
 using Tullio
 using Unitful
+using LinearAlgebra
+using Base.Iterators
+using StaticArrays
+using Printf
+using LaTeXStrings
+using Plots
 using Dates
 using Images
 
-using StaticArrays
 
 #GLOBAL THRESHOLD DEFAULT VALUES
 #1D value for factor of maximum gradient
