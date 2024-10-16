@@ -292,7 +292,7 @@ plotframe2D function to plot 2d frames including shock points and possibly norma
     - 1: Coarse: usual
     - 2: improved: double (see findShock2D)
 """
-function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; vectors = false, threshold = eps1_euler, level=1) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; shockline = false, vectors = false, threshold = eps1_euler, level=1) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
     shocklist = shockwave_algorithm(frame, data; threshold=threshold, level=level)
@@ -345,26 +345,25 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
        
 
     # Overlay shock points on both plots
-    scatter!(
-        heatmap_plot, 
-        shock_xs, 
-        shock_ys, 
-        color=:red,
-        label="Shock Points", 
-        markersize=1, 
-        marker=:+)
+    #scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1, marker=:+)
 
-    #=
-    contour = true
-    if contour
+    if shockline
         @info "Plot shockwave"
-        float_matrix = zeros(Float64, data.ncells)
+        rows, cols = data.ncells
+        float_matrix = zeros(Float64, rows, cols)
+        rotated_float_matrix = Matrix{Float64}(undef, cols, rows) 
         for (i, j) in shocklist
             float_matrix[i, j] = 1.0
         end
-        contour!(xs, ys, float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
+        for i in 1:rows 
+            for j in 1:cols  
+                rotated_float_matrix[cols - j + 1, i] = float_matrix[i, j]  
+            end
+        end
+        contour!(xs, ys, rotated_float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
     end
-    =#
+    
+    
     
     if vectors
         @info "Plot normal vectors"
@@ -425,7 +424,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = delta_1p, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = compute_density_data, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
