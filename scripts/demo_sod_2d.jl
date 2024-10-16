@@ -6,5 +6,5 @@ example_tapes = [
 
 for tape in example_tapes
     println("Processing $tape ")#on thread $(threadid())")
-    generate_shock_plots2D(load_data(tape))
+    generate_shock_plots2D(load_data(tape), vectors=true, level=6, threshold = 1.25)
 end

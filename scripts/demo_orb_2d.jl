@@ -6,4 +6,4 @@ tape = "../dataSim/sod_shock_orb.tape"
 data = load_data(tape)
 println("Processing $tape ")
 #Find shock waves and plot them directly in the pre-set folder /frames/date-hours-minutes-seconds
-generate_shock_plots2D(data; threshold = 0.2)
+generate_shock_plots2D(data; vectors = true, level = 2, threshold = 0.11)
