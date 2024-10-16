@@ -1,3 +1,4 @@
+using Base.Iterators
 
 """
 Returns matrix containing a vector (∂ρ/∂x, ∂ρ/∂y) at each point, with grid sizes hx and hy of data_no_units.
@@ -335,6 +336,78 @@ function update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)
     end
 end
 
+"""delete unnecessary shockpoints (false positives)
+    #standalone shock points: unlikely to happen
+    
+        In an area around each point of the shocklist, the amount of fellow shock points is evaluated.
+        If it is under a certain threshold, we remove the shockpoint from the list as an allegedly lone shock point, which shall not exist. 
+        (Or, must be sacrificed, in order to eliminate noise from the solver.)
+    
+"""
+function remove_lonely_points!(shocklist)
+    for point in shocklist
+        radiusThreshold = 3
+        neighborsOfPoint = find_neighbors(point, radiusThreshold)
+        @show length(neighborsOfPoint)
+        n_neighbor = 0
+        for neighbor in neighborsOfPoint
+            if neighbor in shocklist
+                n_neighbor += 1
+            end
+        end
+
+        if n_neighbor < 3  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
+            #delete!(shocklist, point)
+            #ugly way to delete point from shocklist
+            i = indexin(point, shocklist)
+            if isnothing(i[1])
+                continue
+            else
+                i = Int(i[1])
+            end
+            deleteat!(shocklist, i)
+            @info point "lonely hence eliminate"
+        end
+    end
+end
+
+function remove_points_near_obstacle!(shocklist, data, frame)
+     # We check for an arbitrary physical property of the CellSim and search for the Nothings.
+     density = density_field(data, frame)
+     for point in shocklist
+         radiusThreshold = 3
+         neighborsOfPoint = find_neighbors(point, radiusThreshold)
+         n_nothing = 0
+
+         for neighbor in neighborsOfPoint
+             xx = neighbor[1] 
+             yy = neighbor[2] 
+             
+             try
+                 if isnothing(density[xx,yy])
+                     n_nothing += 1
+                 end
+             catch(e)
+                 #@warn e
+             end
+         end
+         
+         if n_nothing > 1  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
+             #ugly way to delete point from shocklist
+             i = indexin(point, shocklist)
+             if isnothing(i[1])
+                 continue
+             else
+                 i = Int(i[1])
+             end
+             deleteat!(shocklist, i)
+             @show n_nothing "at " point
+             @info point "near osbtacle hence eliminate"
+         end
+     end
+ end
+
+
 """
 Finds all shockpoints from the dataset data at the frame-th timestep and returns a list of their coordinates. Takes as inputs:
 - frame: the frame-th step that of the simulation object that shall be processed.
@@ -401,30 +474,8 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         end
     end
 
-    #delete unnecessary shockpoints (false positives)
-    #standalone shock points: unlikely to happen
-    #=
-        In an area around each point of the shocklist, the amount of fellow shock points is evaluated.
-        If it is under a certain threshold, we remove the shockpoint from the list as an allegedly lone shock point, which shall not exist. 
-        (Or, must be sacrificed, in order to eliminate noise from the solver.)
-    =#
     if level < 4
-        for point in shocklist
-            radiusThreshold = 3
-            neighborsOfPoint = find_neighbors(point, radiusThreshold)
-            if size(neighborsOfPoint)[1] > radiusThreshold # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
-                #delete!(shocklist, point)
-                #ugly way to delete point from shocklist
-                i = indexin(point, shocklist)
-                if isnothing(i[1])
-                    continue
-                else
-                    i = Int(i[1])
-                end
-                deleteat!(shocklist, i)
-                #@info point "lonely hence eliminate"
-            end
-        end
+        remove_lonely_points!(shocklist)
     end
     
     #=
@@ -433,39 +484,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
     if level < 5
         #next to borders. no shocks at obstacles.
         if data isa CellBasedEulerSim
-            # We check for an arbitrary physical property of the CellSim and search for the Nothings.
-            density = density_field(data, frame)
-            for point in shocklist
-                radiusThreshold = 2
-                neighborsOfPoint = find_neighbors(point, radiusThreshold)
-                n_nothing = 0
-
-                for neighbor in neighborsOfPoint
-                    xx = neighbor[1] 
-                    yy = neighbor[2] 
-                    
-                    try
-                        if isnothing(density[xx,yy])
-                            n_nothing += 1
-                            #@info "nothing point at" [xx,yy]
-                        end
-                    catch(e)
-                        @warn e
-                    end
-                end
-
-                if n_nothing > radiusThreshold * 1.5 # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
-                    #ugly way to delete point from shocklist
-                    i = indexin(point, shocklist)
-                    if isnothing(i[1])
-                        continue
-                    else
-                        i = Int(i[1])
-                    end
-                    deleteat!(shocklist, i)
-                    #@info point "near osbtacle hence eliminate"
-                end
-            end
+           remove_points_near_obstacle!(shocklist, data, frame)
         end
     end
 
