@@ -454,7 +454,7 @@ end
 """ 
 General-case wrapper discriminating 1D and 2D
 """
-function generateShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function plotShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", html = false, vectors = false, threshold = 0.133, level = 1) where {T}
 
     if data isa EulerSim{1,3,T}
         generate_shock_plots1D(data, save_dir = save_dir, shockwave_algorithm = findShock1D; html=html, threshold = threshold)
@@ -464,3 +464,6 @@ function generateShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEul
         @error "Data argument is a " typeof(data) " and failed to be read."
     end
 end
+
+
+
