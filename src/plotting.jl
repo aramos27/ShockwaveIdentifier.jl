@@ -66,14 +66,6 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     catch 
         x_shock = shockwave_algorithm(frame, data)
     end
-    #x_shock = shockwave_algorithm(v_data)
-
-    # density, momentum, and energy
-    for i = 1:1
-        p = plot(xs, u_data[i, :], legend=(i==1), label=false, ylabel=ylabels[i],
-                 xticks=(i==3), xgrid=true, ylims=bounds[i], dpi=600)
-        push!(ps, p)
-    end
 
     #Get from data at frame density, presure, velocity
     density_data = vec(density_field(data, frame))
@@ -82,11 +74,15 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
 
     # Pressure
     pressure_plot = plot(xs, p_data, ylabel=L"P", legend=false)
-    scatter!(pressure_plot, [xs[x_shock]], [p_data[x_shock]], label="Shockwave",markersize=1, color="orange")
+    scatter!(pressure_plot, [xs[x_shock]], [p_data[x_shock]], label="Shockwave",markersize=1.8, opacity = 0.5, color="orange")
 
     # Velocity
     velocity_plot = plot(xs, v_data, ylabel=L"v", legend=false)
-    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], label="Shockwave",markersize=1, color="orange")
+    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], label="Shockwave",markersize=1.8, opacity = 0.5, color="orange")
+
+    # Density
+    density_plot = plot(xs, density_data, ylabel=L"ρ", legend=false)
+    scatter!(density_plot, [xs[x_shock]], [density_data[x_shock]], label="Shockwave",markersize=1.8, opacity = 0.5, color="orange")
 
 
     # Gradient Pressure
@@ -111,7 +107,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     # d1p: density * velocity_norm
     d1p = density_gradient .* ustrip.(v_data)[1:end]
 
-    d1p_plot = plot(xs, d1p, ylabel=L"δ_1_ρ", legend="s")
+    d1p_plot = plot(xs, d1p, ylabel=L"δ_1ρ", legend=false)
 
 
     mach_data = vec(mach_number_field(data, frame, DRY_AIR))
@@ -122,30 +118,32 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     mach_gradient_plot = plot(xs, dmach, ylabel=L"\nabla Mach",  legend=false)
 
     # Plot shockwave points
-    scatter!(ps[1], [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
-    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
-    scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
-    scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
-    scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
-    #scatter!(velocity_gradient_plot, [xs[x_shock]], [velocity_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")        
-    scatter!(mach_plot, [xs[x_shock]], [mach_data[x_shock]], markersize=1,label="Shockwave", color="orange")        
+    scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], markersize=1.8, opacity = 0.5, label="Shockwave", color="orange")
+    scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1.8, opacity = 0.5,label="Shockwave", color="orange")
+    scatter!(velocity_gradient_plot, [xs[x_shock]], [velocity_gradient[x_shock]], markersize=1.8, opacity = 0.5,label="Shockwave", color="orange")        
+    scatter!(mach_plot, [xs[x_shock]], [mach_data[x_shock]], markersize=1.8, opacity = 0.5,label="Shockwave", color="orange")    
+    scatter!(mach_gradient_plot, [xs[x_shock]], [dmach[x_shock]], markersize=1.8, opacity = 0.5,label="Shockwave", color="orange")      
 
 
-    titlestr = @sprintf "1D Shock detection with velocity and mach number at frame %d timestep=%.4e" frame t
+    titlestr = @sprintf "1D Shock detection \n Frame %d ,Timestep=%.4e" frame t
 
     """Plot the plots to a fig object. If debug, plot all. if no debug, only plot density + gradient. """
     if debug
         fig = plot(
-            ps[1], density_gradient_plot, d1p_plot, pressure_plot, pressure_gradient_plot, 
+            density_plot, density_gradient_plot, d1p_plot, pressure_plot, pressure_gradient_plot, 
             velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot,
-            layout = (2, 5), # Layout with 2 rows and 4 columns
+            layout = (2, 5), 
             suptitle = titlestr,
+            titlefontsize = 12,
+            size = (1000, 1000),   # Increase figure size
             titlefontface = "Computer Modern"
         )
     else
-        fig = plot(ps[1], d1p_plot, velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot, 
+        fig = plot(density_plot, d1p_plot, velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot, 
         layout = (2, 3),
         suptitle=titlestr, 
+        titlefontsize = 12,
+        size = (1000, 1000),   # Increase figure size
         titlefontface="Computer Modern")
     end
     if save == true
@@ -353,7 +351,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
        
 
     # Overlay shock points on both plots
-    #scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1, marker=:+)
+    #scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1.8, opacity = 0.5, marker=:+)
 
     if shockline
         @info "Plot shockwave"
