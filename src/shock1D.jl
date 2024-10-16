@@ -156,9 +156,10 @@ function findShock1D(frame, data::EulerSim{1, 3, T}; threshold=eps_1d) where{T}
 	else
 		@info "Gradient of density is zero. Switching to approach based on 2D."
 		density_data = u_data[1, :]
-
+		density_data_gradient = diff(density_data)
+		push!(density_data_gradient, 0)
 		#analogue aproach to 2D: We compare the gradient of density multiplied by normalized velocity
-		d1p = diff(density_data) .* normalize(ustrip.(v_data)[1:(end)])
+		d1p = density_data_gradient .* normalize(ustrip.(v_data)[1:(end)])
 
 		grad_max = maximum(d1p)
 
