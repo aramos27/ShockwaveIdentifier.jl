@@ -348,6 +348,7 @@ function remove_lonely_points!(shocklist)
     for point in shocklist
         radiusThreshold = 3
         neighborsOfPoint = find_neighbors(point, radiusThreshold)
+
         n_neighbor = 0
         for neighbor in neighborsOfPoint
             if neighbor in shocklist
@@ -443,34 +444,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         # Find and append neighboring points with less strict gradient conditions
         update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)
 
-        println("Amount of shock points: ", size(shocklist)[1])
-
-
-    #Watchout! Slow, inefficient, insecure
-    elseif level == 6
-
-        # Part II: Find neighbors of cells in shocklist with high gradients, but not as high.
-        blanked_relaxed = blank(d1p, d2p, 0.2 * threshold, 10e-5) #blank with lower cutoff threshold.
-        shocklist_relaxed = Tuple.(findall(blanked_relaxed .== true))
-
-        #Find points in shocklist_2 (with less strict criteria) who are close to existing shocks, and append them.
-        lenList = size(shocklist)[1]
-        #@show size(shocklist)[1]
-        for points in 1:lenList
-            for point1 in shocklist_relaxed
-                # Calculate distances between point1 and each point in shocklist
-                distances = [norm(point1 .- point2) for point2 in shocklist]
-                min_d = minimum(distances)
-                
-                if min_d < 1.5
-                    push!(shocklist, point1)
-                    # Construct shockwaves below.
-                end
-            end
-            if points % 5 == 0
-                println("Progress (Abs./%): $(points); $(100 * points/(lenList)) %")
-            end
-        end
+        @info "Amount of shock points: " size(shocklist)[1]
     end
 
     if level < 4
@@ -486,7 +460,7 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
            remove_points_near_obstacle!(shocklist, data, frame)
         end
     end
-
+    println("Amount of shock points: ", size(shocklist)[1])
     #Construct shockwaves below.
     return shocklist
 end

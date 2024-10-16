@@ -399,7 +399,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
                 heatmap_plot,
                 shock_xs .+ i .* shockdir_xs,  # Adjust points along direction
                 shock_ys .+ i .* shockdir_ys,
-                color=:yellow,
+                color=:green,
                 label=false, 
                 markersize=0.6, 
                 marker=:+
@@ -409,7 +409,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
                 heatmap_plot,
                 shock_xs .+ 0.1 .* shockdir_xs,  # Adjust points along direction
                 shock_ys .+ 0.1 .* shockdir_ys,
-                color=:yellow,
+                color=:green,
                 label="Shock directions", 
                 markersize=0.6, 
                 marker=:x
