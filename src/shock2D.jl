@@ -348,7 +348,6 @@ function remove_lonely_points!(shocklist)
     for point in shocklist
         radiusThreshold = 3
         neighborsOfPoint = find_neighbors(point, radiusThreshold)
-        @show length(neighborsOfPoint)
         n_neighbor = 0
         for neighbor in neighborsOfPoint
             if neighbor in shocklist
