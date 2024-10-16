@@ -111,7 +111,7 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     # d1p: density * velocity_norm
     d1p = density_gradient .* ustrip.(v_data)[1:end]
 
-    d1p_plot = plot(xs, d1p, ylabel=L"δ_1_ρ", legend=false)
+    d1p_plot = plot(xs, d1p, ylabel=L"δ_1_ρ", legend="s")
 
 
     mach_data = vec(mach_number_field(data, frame, DRY_AIR))
@@ -121,24 +121,32 @@ function plotframe1D(frame, data::EulerSim{1, 3, T},shockwave_algorithm; save = 
     mach_plot = plot(xs, mach_data, ylabel=L"Mach", legend=false)
     mach_gradient_plot = plot(xs, dmach, ylabel=L"\nabla Mach",  legend=false)
 
-    # Plotting
+    # Plot shockwave points
+    scatter!(ps[1], [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
     scatter!(velocity_plot, [xs[x_shock]], [v_data[x_shock]], markersize=1, label="Shockwave", color="orange")
     scatter!(d1p_plot, [xs[x_shock]], [d1p[x_shock]], markersize=1,label="Shockwave", color="orange")
     scatter!(density_gradient_plot, [xs[x_shock]], [density_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
     scatter!(pressure_gradient_plot, [xs[x_shock]], [pressure_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")
-    scatter!(velocity_gradient_plot, [xs[x_shock]], [velocity_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")        
+    #scatter!(velocity_gradient_plot, [xs[x_shock]], [velocity_gradient[x_shock]], markersize=1,label="Shockwave", color="orange")        
     scatter!(mach_plot, [xs[x_shock]], [mach_data[x_shock]], markersize=1,label="Shockwave", color="orange")        
 
-    #@show size.([v_data, d1p, mach_data, dmach, velocity_gradient, pressure_gradient, density_gradient])
 
-    titlestr = @sprintf "n=%d t=%.4e" frame t
+    titlestr = @sprintf "1D Shock detection with velocity and mach number at frame %d timestep=%.4e" frame t
 
     """Plot the plots to a fig object. If debug, plot all. if no debug, only plot density + gradient. """
     if debug
-        fig =  plot(ps[1], density_gradient_plot, d1p_plot, pressure_plot, pressure_gradient_plot, velocity_plot, velocity_gradient_plot, mach_plot,
-            suptitle=titlestr, titlefontface="Computer Modern")
+        fig = plot(
+            ps[1], density_gradient_plot, d1p_plot, pressure_plot, pressure_gradient_plot, 
+            velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot,
+            layout = (2, 5), # Layout with 2 rows and 4 columns
+            suptitle = titlestr,
+            titlefontface = "Computer Modern"
+        )
     else
-        fig = plot(ps[1], density_gradient_plot, d1p_plot, velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot, suptitle=titlestr, titlefontface="Computer Modern")
+        fig = plot(ps[1], d1p_plot, velocity_plot, velocity_gradient_plot, mach_plot, mach_gradient_plot, 
+        layout = (2, 3),
+        suptitle=titlestr, 
+        titlefontface="Computer Modern")
     end
     if save == true
         savefig(fig, "plot1d_shock_$(frame)")
