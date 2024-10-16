@@ -336,15 +336,23 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
 
     # Plotting heatmaps
     #Plotting
-    heatmap_plot = heatmap(xs, ys, rotated, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    heatmap_plot = heatmap(xs, ys, rotated, aspect_ratio=:1, size= (2000,2000), title=header, color=:viridis, xlabel="X", ylabel="Y",legendfontsize =20, ytickfontsize = 16)
     
 
-    # Extract shock point coordinates
+    # Regrouped shock point and direction vectors
     shock_xs = [xs[i] for (i, j) in shocklist]
     shock_ys = [ys[j] for (i, j) in shocklist]
+       
 
     # Overlay shock points on both plots
-    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red, label="Shock Points", markersize=1, marker=:cross)
+    scatter!(
+        heatmap_plot, 
+        shock_xs, 
+        shock_ys, 
+        color=:red,
+        label="Shock Points", 
+        markersize=1, 
+        marker=:+)
 
     #=
     contour = true
@@ -360,33 +368,53 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
     
     if vectors
         @info "Plot normal vectors"
+
+
         """
         Used in the subsequent quiver plot to determine how few arrows are plotted. higher density -> lower amount of arrows, contraintuitively.
         Set to 1 to see all arrows. 
         """
-
-        shock_dir = normalVectors(frame,data,shocklist)
-        arrow_density = 10
+        arrow_density = 10        
         
+        """
+        Used in the subsequent quiver plot to determine how many points are plotted per arrow  higher direction_density -> higher amount of pixels.
+        Set to 1 to see all arrows. 
+        """
+        direction_density = 10
         if arrow_density < 1
             arrow_density = 1
         end
 
-        quiver!(
-            heatmap_plot,
-            [p[1] for p in shocklist[1:arrow_density:end]], 
-            [p[2] for p in shocklist[1:arrow_density:end]], 
-            quiver=( [-10 .* n[1] for n in shock_dir[1:arrow_density:end]], [-10 .* n[2] for n in shock_dir[1:arrow_density:end]]), 
-            color=:red, 
-            legend=:false,  # Add legend to the top right corner
-            title= "Suggested Shocks with directions step $frame",
-            xlabel="X", ylabel="Y", 
-            size = (1000,1000),
-            z=1,            
-            arrow=Plots.arrow(:closed, :head,0.1, 0.1),
-                )
-                       
-            
+        # Regrouped shock point and direction vectors
+
+        shock_xs = [xs[i] for (i, j) in shocklist[1:arrow_density:end]]
+        shock_ys = [ys[j] for (i, j) in shocklist[1:arrow_density:end]]
+        shock_dir = normalVectors(frame, data, shocklist[1:arrow_density:end])
+        shockdir_xs = [dir[1] for dir in shock_dir]
+        shockdir_ys = [dir[2] for dir in shock_dir]
+         
+
+        for i in range(0, 0.1, length=direction_density)
+            scatter!(
+                heatmap_plot,
+                shock_xs .+ i .* shockdir_xs,  # Adjust points along direction
+                shock_ys .+ i .* shockdir_ys,
+                color=:yellow,
+                label=false, 
+                markersize=0.6, 
+                marker=:+
+            )
+        end
+        scatter!(
+                heatmap_plot,
+                shock_xs .+ 0.1 .* shockdir_xs,  # Adjust points along direction
+                shock_ys .+ 0.1 .* shockdir_ys,
+                color=:yellow,
+                label="Shock directions", 
+                markersize=0.6, 
+                marker=:x
+            )
+
     end
     
     final_plot_layout = plot(heatmap_plot)
@@ -397,7 +425,7 @@ end
 """ 
 Analogue to 1D function
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = compute_density_data, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = delta_1p, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
@@ -454,7 +482,7 @@ end
 """ 
 General-case wrapper discriminating 1D and 2D
 """
-function plotShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function generateShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", html = false, vectors = false, threshold = 0.133, level = 1) where {T}
 
     if data isa EulerSim{1,3,T}
         generate_shock_plots1D(data, save_dir = save_dir, shockwave_algorithm = findShock1D; html=html, threshold = threshold)
@@ -464,6 +492,3 @@ function plotShock(data::Union{EulerSim{1,3,T},EulerSim{2,4,T}, CellBasedEulerSi
         @error "Data argument is a " typeof(data) " and failed to be read."
     end
 end
-
-
-
