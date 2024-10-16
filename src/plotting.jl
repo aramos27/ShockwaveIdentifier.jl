@@ -471,7 +471,7 @@ function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T
 
     for step in 1:data.nsteps
 
-        final_plot_layout = plotframe2D(step,data,compute_data_func,findShock2D; vectors=vectors, threshold = threshold, level = level)
+        final_plot_layout = plotframe2D(step,data,compute_data_func,findShock2D; shockline=true, vectors=vectors, threshold = threshold, level = level)
 
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
 
