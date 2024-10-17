@@ -3,9 +3,6 @@ using Test
 
 temp_dir = "../tmp"
 @testset "ShockwaveIdentifier.jl" begin
-    if !isdir("frames/")
-        mkdir("frames/")
-    end
     @testset "Compilation Test" begin
         # (Pre-)Compilation Test: Are all (important) functions existing?
         using ShockwaveIdentifier
@@ -26,17 +23,16 @@ temp_dir = "../tmp"
         @test load_data("../dataSim/funky_square.celltape") isa CellBasedEulerSim
         @test load_data("../dataSim/sod_shock_left_1d.tape") isa EulerSim
     end
-
-    @testset "Shock detection tests" begin 
-        include("shorttests.jl")
+    @testset "Run test 1D" begin
+        include("../scripts/demo_full_1d.jl")
     end
 
-    @testset "Plot tests" begin
-        include("plottests.jl")
+    @testset "Run test 2D (array)" begin
+        include("../scripts/demo_orb_2d.jl")
     end
 
-    if ispath("frames/")
-        rm("frames/")
+    @testset "Run test 2D (cells)" begin
+        include("../scripts/demo_celltape.jl")
     end
 end
 
