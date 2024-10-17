@@ -239,8 +239,21 @@ function plotframe2D(frame, data::EulerSim{2, 4, T}, compute_data_function) wher
         header = "Unknown Data"
     end
 
+    #rotate matrix for correct plots
+    plot_data_no_units = [x === nothing ? 0.0 : ustrip(x) for x in plot_data]   
+    rows, cols = size(plot_data_no_units)
+    rotated = Matrix{Float64}(undef, cols, rows) 
+
+    for i in 1:rows 
+        for j in 1:cols  
+            rotated[cols - j + 1, i] = plot_data_no_units[i, j]  
+        end
+    end
     #Plotting
-    heatmap_plot = heatmap(xs, ys, plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
+    heatmap_plot = heatmap(xs, ys, rotated, aspect_ratio=:1, size= (2000,2000), title=header, color=:viridis, xlabel="X", ylabel="Y",legendfontsize =20, ytickfontsize = 16)
+
+    #Plotting
+    #heatmap_plot = heatmap(xs, ys, plot_data, aspect_ratio=:1, size= (1000,1000), title=header, color=:viridis, xlabel="X", ylabel="Y")
     final_plot_layout = plot(heatmap_plot)
     return final_plot_layout
     #THIS RETURNS A PLOT OBJECT; THE PLOT IS NOT SAVED IN A FILE
