@@ -83,8 +83,8 @@ function delta_1p(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) whe
 
     #because the other option (x*y) turns out to be quite large, we will try the grid size instead.
     #state of 10.09.2024: It seems to work.
-    
-    l = 0.5 * (cell_centers(data)[1][2] - cell_centers(data)[1][1] + cell_centers(data)[2][2] - cell_centers(data)[2][1]) / 2
+    #l = cell_centers(data)[2][2] - cell_centers(data)[2][1]
+    l = 0.5 * (cell_centers(data)[1][2] - cell_centers(data)[1][1] + cell_centers(data)[2][2] - cell_centers(data)[2][1]) 
 
     ρ = compute_density_data(frame, data)
     ρ = ustrip.(ρ)
@@ -447,14 +447,14 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
         @info "Amount of shock points: " size(shocklist)[1]
     end
 
-    if level < 4
+    if level > 1
         remove_lonely_points!(shocklist)
     end
     
     #=
     Shock points in close proximity of an obstacle (=nothing values in physical properties) are removed.
     =#
-    if level < 5
+    if level > 1
         #next to borders. no shocks at obstacles.
         if data isa CellBasedEulerSim
            remove_points_near_obstacle!(shocklist, data, frame)
