@@ -351,7 +351,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
        
 
     # Overlay shock points on both plots
-    #scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1.8, opacity = 0.5, marker=:+)
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1, marker=:+)
 
     if shockline
         @info "Plot shockwave"

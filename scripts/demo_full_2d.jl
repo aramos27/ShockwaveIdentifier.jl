@@ -12,5 +12,5 @@ tape_data = [
 
 for tape in tape_data
     println("Processing $tape")
-    generate_shock_plots2D(load_data(tape[1]), vectors=true, level=tape[2], threshold=tape[3])
+    generate_shock_plots2D(load_data(tape[1]), vectors=false, level=tape[2], threshold=tape[3])
 end
