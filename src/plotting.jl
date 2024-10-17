@@ -415,8 +415,8 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
         for i in range(0, 0.1, length=direction_density)
             scatter!(
                 heatmap_plot,
-                shock_xs .+ i .* shockdir_xs,  # Adjust points along direction
-                shock_ys .+ i .* shockdir_ys,
+                shock_xs .- i .* shockdir_xs,  # Adjust points along direction
+                shock_ys .- i .* shockdir_ys,
                 color=:green,
                 label=false, 
                 markersize=0.6, 
@@ -425,8 +425,8 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
         end
         scatter!(
                 heatmap_plot,
-                shock_xs .+ 0.1 .* shockdir_xs,  # Adjust points along direction
-                shock_ys .+ 0.1 .* shockdir_ys,
+                shock_xs .- 0.1 .* shockdir_xs,  # Adjust points along direction
+                shock_ys .- 0.1 .* shockdir_ys,
                 color=:green,
                 label="Shock directions", 
                 markersize=0.6, 
