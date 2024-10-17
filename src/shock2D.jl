@@ -446,18 +446,19 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
 
         @info "Amount of shock points: " size(shocklist)[1]
     end
-
     if level > 1
-        remove_lonely_points!(shocklist)
-    end
-    
-    #=
-    Shock points in close proximity of an obstacle (=nothing values in physical properties) are removed.
-    =#
-    if level > 1
-        #next to borders. no shocks at obstacles.
-        if data isa CellBasedEulerSim
-           remove_points_near_obstacle!(shocklist, data, frame)
+        if level < 4
+            remove_lonely_points!(shocklist)
+        end
+        
+        #=
+        Shock points in close proximity of an obstacle (=nothing values in physical properties) are removed.
+        =#
+        if level < 5
+            #next to borders. no shocks at obstacles.
+            if data isa CellBasedEulerSim
+            remove_points_near_obstacle!(shocklist, data, frame)
+            end
         end
     end
     println("Amount of shock points: ", size(shocklist)[1])
