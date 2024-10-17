@@ -3,20 +3,39 @@ using Test
 
 temp_dir = "../tmp"
 @testset "ShockwaveIdentifier.jl" begin
-    # (Pre-)Compilation Test
-    using ShockwaveIdentifier
+    @testset "Compilation Test" begin
+        # (Pre-)Compilation Test: Are all (important) functions existing?
+        using ShockwaveIdentifier
+        @test findShock1D isa Function
+        @test findShock1D isa Function
+
+        @test normalVectors isa Function
+
+        @test plotframe1D isa Function
+        @test plotframe2D isa Function
+        @test generate_shock_plots1D isa Function
+        @test generate_shock_plots2D isa Function
+        end
+
+    @testset "Load/Import test" begin
+        # Test whether tapes can be loaded (and are at the right place)
+        using Euler2D
+        @test load_data("../dataSim/funky_square.celltape") isa CellBasedEulerSim
+        @test load_data("../dataSim/sod_shock_left_1d.tape") isa EulerSim
+    end
+    @testset "Run test 1D" begin
+        include("../scripts/demo_full_1d.jl")
+    end
+
+    @testset "Run test 2D (array)" begin
+        include("../scripts/demo_orb_2d.jl")
+    end
+
+    @testset "Run test 2D (cells)" begin
+        include("../scripts/demo_celltape.jl")
+    end
 end
 
-@testset "Load tape files" begin
-#array sims
-    #1d tape
-    load_data("../dataSim/supersonic_shock_2.tape")
-    #2d tape
-    load_data("../dataSim/sod_shock_right_2d.tape")
-#cell sims
-    #2d celltape
-    load_data("../dataSim/funky_triangle.celltape")
-end
 
 @testset "Supersonic 1D Test" begin
     tapes = [
