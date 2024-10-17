@@ -4,10 +4,16 @@ function load_sim_data(filename; T=Float64)
 end
 
 """
+    load_data(filename; T=Float64)
 
-    load_data(path; T=Float64)
+Load an array-based or cell-based simulation from `filename`. Supports `.tape` and `.celltape` files.
 
-Load an either array-based or cell-based simulation from path, computed with data type `T`.
+# Arguments
+- `filename`: The path to the file to load (`.tape` or `.celltape`).
+- `T`: (Optional) The data type to use for the simulation, default is `Float64`.
+
+# Returns
+An `EulerSim` or `CellBasedEulerSim` object based on the file type.
 """
 function load_data(filename; T=Float64)
     if endswith(filename, ".tape")
@@ -22,7 +28,16 @@ end
 
 
 """
-Returns matrix with pressure data and units for given array-based simulation
+    compute_pressure_data(frame, data::EulerSim{2,4,T}) where {T}
+
+Returns a matrix of pressure data with units for a given array-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the pressure data from.
+- `data`: An array-based simulation (`EulerSim{2,4,T}`).
+
+# Returns
+A matrix containing the pressure values with appropriate units.
 """
 function compute_pressure_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
@@ -35,7 +50,16 @@ function compute_pressure_data(frame, data::EulerSim{2,4,T}) where {T}
 end
 
 """
-Returns matrix with pressure data and units for given cell-based simulation
+    compute_pressure_data(frame, data::CellBasedEulerSim)
+
+Returns a matrix of pressure data with units for a given cell-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the pressure data from.
+- `data`: A cell-based simulation (`CellBasedEulerSim`).
+
+# Returns
+A matrix containing the pressure values with units stripped.
 """
 function compute_pressure_data(frame, data::CellBasedEulerSim)
     p = pressure_field(data, frame, DRY_AIR)
@@ -46,7 +70,16 @@ function compute_pressure_data(frame, data::CellBasedEulerSim)
 end
 
 """
-Returns matrix with velocity data and units for given array-based simulation
+    compute_velocity_data(frame, data::EulerSim{2,4,T}) where {T}
+
+Returns a matrix of velocity data with units for a given array-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the velocity data from.
+- `data`: An array-based simulation (`EulerSim{2,4,T}`).
+
+# Returns
+A matrix containing the velocity values.
 """
 function compute_velocity_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
@@ -58,7 +91,16 @@ function compute_velocity_data(frame, data::EulerSim{2,4,T}) where {T}
 end
 
 """
-Returns matrix with velocity data and units for given cell-based simulation
+    compute_velocity_data(frame, data::CellBasedEulerSim{T}) where {T}
+
+Returns a matrix of velocity data with units for a given cell-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the velocity data from.
+- `data`: A cell-based simulation (`CellBasedEulerSim{T}`).
+
+# Returns
+A matrix containing velocity vectors (as static vectors).
 """
 function compute_velocity_data(frame, data::CellBasedEulerSim{T}) where {T}
     v = velocity_field(data, frame)
@@ -77,7 +119,16 @@ function compute_velocity_data(frame, data::CellBasedEulerSim{T}) where {T}
 end
 
 """
-Returns matrix with density data and units for given array-based simulation
+    compute_density_data(frame, data::EulerSim{2,4,T}) where {T}
+
+Returns a matrix of density data with units for a given array-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the density data from.
+- `data`: An array-based simulation (`EulerSim{2,4,T}`).
+
+# Returns
+A matrix containing the density values.
 """
 function compute_density_data(frame, data::EulerSim{2,4,T}) where {T}
     (t, u_data) = nth_step(data, frame)
@@ -92,7 +143,16 @@ end
 
 
 """
-Returns matrix with density data and units for given cell-based simulation
+    compute_density_data(frame, data::CellBasedEulerSim)
+
+Returns a matrix of density data with units for a given cell-based simulation.
+
+# Arguments
+- `frame`: The frame number to extract the density data from.
+- `data`: A cell-based simulation (`CellBasedEulerSim`).
+
+# Returns
+A matrix containing the density values with units stripped.
 """
 function compute_density_data(frame, data::CellBasedEulerSim)
     rho = density_field(data,frame)
@@ -103,7 +163,16 @@ function compute_density_data(frame, data::CellBasedEulerSim)
 end
 
 """
-Return matrix of normalized velocity vectors for both cell and array-based simulations
+    normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+
+Returns a matrix of normalized velocity vectors for both array-based and cell-based simulations.
+
+# Arguments
+- `frame`: The frame number to extract the velocity data from.
+- `data`: A simulation (`EulerSim{2,4,T}` or `CellBasedEulerSim{T}`).
+
+# Returns
+A matrix of normalized velocity vectors.
 """
 function normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
     velocity_xy = compute_velocity_data(frame, data)
@@ -122,7 +191,16 @@ function normalized_velocity(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerS
 end
 
 """
-Return matrix of velocity magnitudes for both cell and array-based simulations
+    compute_velocity_magnitude_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
+
+Returns a matrix of velocity magnitudes for both array-based and cell-based simulations.
+
+# Arguments
+- `frame`: The frame number to extract the velocity data from.
+- `data`: A simulation (`EulerSim{2,4,T}` or `CellBasedEulerSim{T}`).
+
+# Returns
+A matrix of velocity magnitudes.
 """
 function compute_velocity_magnitude_data(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}) where {T}
     v = compute_velocity_data(frame, data)
@@ -131,7 +209,16 @@ function compute_velocity_magnitude_data(frame, data::Union{EulerSim{2,4,T}, Cel
 end
 
 """
-Given a matrix A with elements of type [x,y] and a matrix B of type float, it returns A/B
+    divide_matrices(matrix1, matrix2)
+
+Given a matrix `matrix1` of vectors [x, y] and a matrix `matrix2` of scalar values, return the result of `matrix1 / matrix2` element-wise.
+
+# Arguments
+- `matrix1`: A matrix with vector elements (e.g., `SVector`).
+- `matrix2`: A matrix with scalar elements.
+
+# Returns
+A new matrix where each vector in `matrix1` is divided by the corresponding scalar in `matrix2`.
 """
 function divide_matrices(matrix1, matrix2) 
     if size(matrix1) != size(matrix2)
