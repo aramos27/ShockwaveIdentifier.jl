@@ -6,10 +6,14 @@ The Package ShockwaveIdentifier.jl enables the user to identify the position of 
 - Interpret a grid of Nu x Nx x nY grid data
 - Finding the Normal vectors of the shockwaves at their respective shock points.
 
-# Installation
-Pending
+# Installation:
+using Pkg
+Pkg.add(PackageSpec(url="https://github.com/aramos27/ShockwaveIdentifier.jl"))
 
-# Main Functions 
+# Example usage:
+For example usage please refer to the demo files inside the scripts directory. 
+
+# Main Functions:
 ```@docs
 load_data
 findShock1D
