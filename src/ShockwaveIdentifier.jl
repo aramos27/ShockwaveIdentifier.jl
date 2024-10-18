@@ -76,7 +76,7 @@ export plotframe1D
 export generate_shock_plots1D
 export generate_shock_plots2D
 export plotframe2D
-export plotShock #wrapper for generate_shock_plots1D generate_shock_plots2D
+export generateShock #wrapper for generate_shock_plots1D generate_shock_plots2D
 
 
 end
