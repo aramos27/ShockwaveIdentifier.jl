@@ -1,19 +1,20 @@
-# ShockwaveIdentifier.jl Documentation
+### ShockwaveIdentifier.jl Documentation
 
-The Package ShockwaveIdentifier.jl enables the user to identify the position of shock waves from a grid, including the ability to: 
+The Package ShockwaveIdentifier.jl enables the user to identify shockwaves from CFD simulations of the [Euler2D](https://github.com/STCE-at-RWTH/Euler2D.jl) package, by: 
 
-- Interpret a grid of Nu x Nx grid data
-- Interpret a grid of Nu x Nx x nY grid data
-- Finding the Normal vectors of the shockwaves at their respective shock points.
+- Analyzing physical properties (such as density, pressure, etc.) on a one-dimensional spatial grid over time
+- Analyzing physical properties (such as density, pressure, etc.) on a two-dimensional spatial grid over time
+- Finding the normal vectors of the shockwaves at their respective shock points.
 
-# Installation:
+## Installation:
+Execute in REPL:
 using Pkg
 Pkg.add(PackageSpec(url="https://github.com/aramos27/ShockwaveIdentifier.jl"))
 
-# Example usage:
-For example usage please refer to the demo files inside the scripts directory. 
+## Example usage:
+For example usage, please refer to the demo files inside the scripts directory, as well as the Pluto notebooks inside the notebooks directory.
 
-# Main Functions:
+## Main (Exported) Functions:
 ```@docs
 load_data
 findShock1D
@@ -27,7 +28,7 @@ generate_shock_plots2D
 plotframe2D
 ```
 
-# Additional functions found in:
+## Additional functions found in:
 # data_utils.jl:
 ```@docs
 ShockwaveIdentifier.compute_pressure_data

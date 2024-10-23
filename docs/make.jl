@@ -12,5 +12,5 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/aramos27/ShockwaveIdentifier.jl.git",  # GitHub repository URL
+    repo = "github.com/aramos27/ShockwaveIdentifier.jl",  # GitHub repository URL
 )
