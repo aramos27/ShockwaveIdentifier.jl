@@ -436,7 +436,7 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
                 rotated_float_matrix[cols - j + 1, i] = float_matrix[i, j]  
             end
         end
-        contour!(xs, ys, rotated_float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
+        contour!(xs, ys, rotated_float_matrix, levels=[0.5], linecolor=:red, linewidth=0.5)
     end
     
     

@@ -129,8 +129,12 @@ function find_zeros!(discret)
             #signbit: True if negative. False if positive.
             if signbit(discret[i]) != signbit(discret[i-1])
                 if discret[i] != 0 && discret[i-1] != 0
-                    discret[i] = 0
-                    discret[i-1] = 0
+                    #only turn the upper value zero
+                    if abs(discret[i]) > 0
+                        discret[i] = 0
+                    else
+                        discret[i-1] = 0
+                    end
                 end
             end
         end
@@ -146,6 +150,11 @@ function find_zeros!(discret)
                         #make values zero
                         discret[i, j] = 0
                         discret[i, j-1] = 0
+                        if abs(discret[i, j]) > 0
+                            discret[i, j] = 0
+                        else
+                            discret[i, j-1] = 0
+                        end
                     end
                 end
             end
@@ -156,8 +165,11 @@ function find_zeros!(discret)
                 #if sign changes along y axis
                 if signbit(discret[i, j]) != signbit(discret[i-1, j])
                     if discret[i, j] != 0 && discret[i-1, j] != 0
-                        discret[i, j] = 0
-                        discret[i-1, j] = 0
+                        if abs(discret[i, j]) > 0
+                            discret[i, j] = 0
+                        else
+                            discret[i-1, j] = 0
+                        end
                     end
                 end
             end
