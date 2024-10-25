@@ -380,41 +380,36 @@ function remove_lonely_points!(shocklist)
 end
 
 function remove_points_near_obstacle!(shocklist, data, frame)
-     # We check for an arbitrary physical property of the CellSim and search for the Nothings.
-     density = density_field(data, frame)
-     for point in shocklist
-         radiusThreshold = 3
-         neighborsOfPoint = find_neighbors(point, radiusThreshold)
-         n_nothing = 0
+    # We check for an arbitrary physical property of the CellSim and search for the Nothings.
+    density = density_field(data, frame)
+    for point in shocklist
+        radiusThreshold = 4
+        neighborsOfPoint = find_neighbors(point, radiusThreshold)
+        n_nothing = 0
 
-         for neighbor in neighborsOfPoint
-             xx = neighbor[1] 
-             yy = neighbor[2] 
-             
-             try
-                 if isnothing(density[xx,yy])
-                     n_nothing += 1
-                 end
-             catch(e)
-                 #@warn e
-             end
-         end
-         
-         if n_nothing > 1  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
-             #ugly way to delete point from shocklist
-             i = indexin(point, shocklist)
-             if isnothing(i[1])
-                 continue
-             else
-                 i = Int(i[1])
-             end
-             deleteat!(shocklist, i)
-             @show n_nothing "at " point
-             @info point "near osbtacle hence eliminate"
-         end
-     end
+        neighborsIndex = CartesianIndex.(neighborsOfPoint)
+
+        for i in neighborsIndex
+            if isnothing(density[i])
+                n_nothing += 1
+            end
+        end
+        
+        if n_nothing > 1  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
+            #ugly way to delete point from shocklist
+            i = indexin(point, shocklist)
+            if isnothing(i[1])
+                continue
+            else
+                i = Int(i[1])
+            end
+            @show i shocklist[i]
+            deleteat!(shocklist, i)
+            @show n_nothing "at " point
+            @info point "near osbtacle hence eliminate"
+        end
+    end
  end
-
 
 """
 Finds all shockpoints from the dataset data at the frame-th timestep and returns a list of their coordinates. Takes as inputs:
