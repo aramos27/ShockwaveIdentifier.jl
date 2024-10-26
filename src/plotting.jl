@@ -361,6 +361,7 @@ Plots a 2D frame of the specified physical quantity (e.g., density) while incorp
 - `shockline`: A boolean flag indicating whether to plot the shockwave line.
 - `vectors`: A boolean flag indicating whether to plot normal direction vectors at shock points.
 - `threshold`: Value used in the shock detection algorithm.
+- `debug`: Is debug information printed?
 - `level`: Level of detection for shocks.
     - `1`: Coarse detection.
     - `2`: Improved detection (uses `findShock2D`).
@@ -368,10 +369,10 @@ Plots a 2D frame of the specified physical quantity (e.g., density) while incorp
 # Returns
 - A plot object visualizing the specified 2D physical properties, including shock points and normal vectors if specified.
 """
-function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; shockline = false, vectors = false, threshold = eps1_euler, level=1) where {T}
+function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, compute_data_function, shockwave_algorithm; shockline = false, vectors = false, threshold = eps1_euler, level=1, debug = false) where {T}
     (t, u_data) = nth_step(data, frame)
     xs, ys = cell_centers(data)
-    shocklist = shockwave_algorithm(frame, data; threshold=threshold, level=level)
+    shocklist = shockwave_algorithm(frame, data; threshold=threshold, level=level, debug = debug)
     plot_data = compute_data_function(frame, data)
 
     # Determine the header based on the data's units
@@ -421,10 +422,12 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
        
 
     # Overlay shock points on both plots
-    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=1, marker=:+)
+    scatter!(heatmap_plot, shock_xs, shock_ys, color=:red,label="Shock Points", markersize=0.2, marker=:x)
 
     if shockline
-        @info "Plot shockwave"
+        if debug
+            @info "Plot shockwave"
+        end
         rows, cols = data.ncells
         float_matrix = zeros(Float64, rows, cols)
         rotated_float_matrix = Matrix{Float64}(undef, cols, rows) 
@@ -436,13 +439,15 @@ function plotframe2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}, 
                 rotated_float_matrix[cols - j + 1, i] = float_matrix[i, j]  
             end
         end
-        contour!(xs, ys, rotated_float_matrix, levels=[0.5], linecolor=:red, linewidth=2)
+        contour!(xs, ys, rotated_float_matrix, levels=[0.5], linecolor=:red, linewidth=0.5)
     end
     
     
     
     if vectors
-        @info "Plot normal vectors"
+        if debug
+            @info "Plot normal vectors"
+        end
 
 
         """
@@ -509,13 +514,14 @@ Generates and saves plots of shock wave points for the 2D simulation.
 - `compute_data_func`: Function to compute the data to visualize.
 - `html`: A flag indicating whether to generate HTML output (not implemented).
 - `vectors`: A boolean flag indicating whether to plot normal direction vectors at shock points.
+- `debug`: Is debug information printed?
 - `threshold`: Value passed to the shockwave detection algorithm.
 - `level`: Level of detection for shocks.
 
 # Returns
 - None (saves the generated plots as images).
 """
-function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = compute_density_data, html = false, vectors = false, threshold = 0.133, level = 1) where {T}
+function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; save_dir::String = "frames", shockwave_algorithm = findShock2D, compute_data_func = compute_density_data, html = false, vectors = false, threshold = 0.133, level = 1, debug = false) where {T}
     #=
     deviating threshold here so i can detect when threshold was not changed externally by a kwarg. The value here is not of significance, as we see in "    
     if threshold == 0.133
@@ -552,11 +558,13 @@ function generate_shock_plots2D(data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T
         end
     end
 
-    @info "2d threshold value " threshold
+    if debug
+        @info "2d threshold value " threshold
+    end
 
     for step in 1:data.nsteps
 
-        final_plot_layout = plotframe2D(step,data,compute_data_func,findShock2D; shockline=true, vectors=vectors, threshold = threshold, level = level)
+        final_plot_layout = plotframe2D(step,data,compute_data_func,findShock2D; shockline=true, vectors=vectors, threshold = threshold, level = level, debug = debug)
 
         filename = joinpath(save_dir, "output_$(datestr)_frame_$(lpad(step, 3, '0'))")
 

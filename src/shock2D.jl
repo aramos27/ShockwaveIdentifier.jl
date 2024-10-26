@@ -249,7 +249,7 @@ TODO :
 Find eps1, eps2 so that it works. Possible, eps1 will have to depend on the intensity of shockwave. eps2 is set to take into account floating point arithmetic errors.
 
 """
-function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = eps1_cell, eps2::T = 10e-4) where {T<:Number}
+function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = eps1_cell, eps2::T = 10e-7) where {T<:Number}
     # Create a blank matrix of the same size as the input matrices
     blanked = zeros(Bool, size(d1p)) 
 
@@ -264,9 +264,9 @@ function blank(d1p::Matrix{T}, d2p::Matrix{T}, eps1::T = eps1_cell, eps2::T = 10
     for i in 1:size(d1p, 1)
         for j in 1:size(d1p, 2)
             # If both d1p and d2p are zero, set the corresponding element in the blanked matrix to zero
-            if abs(d1p[i,j]) > eps1 #d1p != 0
+            if abs(d1p[i,j]) >= eps1 #d1p != 0
                 
-                if abs(d2p[i, j]) < eps2 #d2p == 0
+                if abs(d2p[i, j]) <= eps2 #d2p == 0
                     blanked[i, j] = true
                     
                     shock_counter += 1
@@ -364,17 +364,15 @@ function remove_lonely_points!(shocklist)
             end
         end
 
-        if n_neighbor < 3  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
+        # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
+        if n_neighbor < radiusThreshold  
             #delete!(shocklist, point)
             #ugly way to delete point from shocklist
-            i = indexin(point, shocklist)
-            if isnothing(i[1])
+            j = findfirst(x -> x == point, shocklist)
+            if isnothing(j)
                 continue
-            else
-                i = Int(i[1])
             end
-            deleteat!(shocklist, i)
-            @info point "lonely hence eliminate"
+            deleteat!(shocklist, j)
         end
     end
 end
@@ -388,25 +386,23 @@ function remove_points_near_obstacle!(shocklist, data, frame)
         n_nothing = 0
 
         neighborsIndex = CartesianIndex.(neighborsOfPoint)
-
-        for i in neighborsIndex
-            if isnothing(density[i])
-                n_nothing += 1
+        try
+            for i in neighborsIndex
+                if isnothing(density[i])
+                    n_nothing += 1
+                end
             end
+        catch e
         end
         
         if n_nothing > 1  # This threshold is arbitary and might need to adapt with 1. the solver, 2. the simulation
             #ugly way to delete point from shocklist
-            i = indexin(point, shocklist)
-            if isnothing(i[1])
+            j = findfirst(x -> x == point, shocklist)
+            if isnothing(j)
                 continue
-            else
-                i = Int(i[1])
             end
-            @show i shocklist[i]
-            deleteat!(shocklist, i)
-            @show n_nothing "at " point
-            @info point "near osbtacle hence eliminate"
+            deleteat!(shocklist, j)
+
         end
     end
  end
@@ -419,11 +415,16 @@ Finds all shockpoints from the dataset data at the frame-th timestep and returns
 - level: 
     - 1 : usual method according to the paper mentioned above (finding extremal points of δ_1_ρ).
     - 2 : applies further nearest-neighbour edge detection with a less harsh condition (blanking threshold lowered), which slows down the function a bit.
-    - ⋝ 4 : does NOT add removal  removal of lonely points (presumably noise)
+    - ⋝ 4 : does NOT add removal of lonely points (presumably noise)
     - ⋝ 5 : does NOT add removal of points near nothing values (obstacles)
+    ⟹
+     - 3: Applies further nearest-neighbour edge detection with a less harsh condition (blanking threshold lowered), and removes lonely points and points near obstacles.
+     - 4: Applies further nearest-neighbour edge detection with a less harsh condition (blanking threshold lowered), and removes points near obstacles.
+     - 5: Applies further nearest-neighbour edge detection with a less harsh condition (blanking threshold lowered).
+
 
 """
-function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; threshold = eps1_euler, level = 2) where {T}
+function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; threshold = eps1_euler, level = 2, debug = false) where {T}
     #Compute δ_1ρ and δ_2ρ at step "frame" and EulerSim "data" (at a timestep of a simulation object).
     d1p = delta_1p(frame, data)
     d2p = delta_2p(frame, data, d1p)
@@ -432,26 +433,25 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
     "Blank" the matrix. E.q. we look where d1p is bigger than 0.15 (ϵ_1) and where d2p is smaller than 0.00001 (ϵ_2).
     These points are marked with a zero.
     =#
-    blanked = blank(d1p, d2p, threshold, 10e-5)
+    blanked = blank(d1p, d2p, threshold, 10e-7)
 
     #The coordinates where we detect a shock condition are put into the array shocklist.
     shocklist = Tuple.(findall(blanked .== true))
 
-
-    #With help by ChatGPT
-    if level == 2
+    if level > 1
         # Part II: Find neighbors of cells in shocklist with high gradients, but not as high.
-        blanked_relaxed = blank(d1p, d2p, 0.2 * threshold, 10e-5) # Relaxed criteria for blanks
-        shocklist_relaxed = Tuple.(findall(blanked_relaxed .== true))
+        blanked_relaxed = blank(d1p, d2p, 0.25 * threshold, 10e-7) # Relaxed criteria for blanks
+        shocklist_relaxed = Tuple.(findall(blanked_relaxed .== true)) #this was suggested by chatgpt and it works
 
         # Find and append neighboring points with less strict gradient conditions
-        update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)
-
-        @info "Amount of shock points: " size(shocklist)[1]
+        update_shocklist_refined(shocklist, shocklist_relaxed; radius=2)        
     end
     if level > 1
         if level < 4
             remove_lonely_points!(shocklist)
+            if debug
+                @info "Amount of shock points after removing lonely points: " size(shocklist)[1]
+            end
         end
         
         #=
@@ -461,10 +461,15 @@ function findShock2D(frame, data::Union{EulerSim{2,4,T}, CellBasedEulerSim{T}}; 
             #next to borders. no shocks at obstacles.
             if data isa CellBasedEulerSim
             remove_points_near_obstacle!(shocklist, data, frame)
+            if debug
+                @info "Amount of shock points after removing points near obstacle: " size(shocklist)[1]
+            end
             end
         end
     end
-    println("Amount of shock points: ", size(shocklist)[1])
+    if debug
+        @info "Amount of shock points: " size(shocklist)[1]
+    end
     #Construct shockwaves below.
     return shocklist
 end
