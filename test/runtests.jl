@@ -63,6 +63,29 @@ end
     rm(temp_dir)
 end
 
+@testset "Sod 2D Detection Test" begin
+    tapes = [
+    "../dataSim/sod_shock_right_2d.tape"
+    ]
+
+    for tape in tapes
+        println("Processing $tape")
+        data = load_data(tape)
+        save_dir = temp_dir
+        for t in 1:data.nsteps
+            if t != 0.
+                shocklist = shockwave_algorithm(t, data, level=1, threshold = 1.25)
+                @test length(shocklist) >= 10
+                @test length(shocklist) <= 30
+            end
+        end
+        generate_shock_plots2D(load_data(tape), )
+    end
+
+    rm(temp_dir)
+end
+
+
 @testset "Celltape 2D Test" begin
     tapes = [
     "../dataSim/funky_triangle.tape"
