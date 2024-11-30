@@ -72,7 +72,7 @@ end
         println("Processing $tape")
         data = load_data(tape)
         save_dir = temp_dir
-        for t in data.nsteps
+        for t in 1:data.nsteps
             if t != 0.
                 shocklist = shockwave_algorithm(t, data, level=1, threshold = 1.25)
                 @test length(shocklist) >= 10
